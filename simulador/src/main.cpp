@@ -56,13 +56,22 @@ int main(int argc, char** argv)
         root->addChild(lights);
     });
 
+	auto keyDown = canvas->keyboard()->keyDown()->connect([&](input::Keyboard::Ptr k) {
+		auto transform = cube->component<Transform>();
+
+		if (k->keyIsDown(input::Keyboard::LEFT))
+			transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
+		if (k->keyIsDown(input::Keyboard::RIGHT))
+			transform->matrix(translate(math::vec3(.1f, 0.f, 0.f)) * transform->matrix());
+	});
+
     auto enterFrame = canvas->enterFrame()->connect([&](Canvas::Ptr canvas, float time, float deltaTime)
     {
-        if (cube)
+        /*if (cube)
             cube->component<Transform>()->matrix(
                 cube->component<Transform>()->matrix()
                 * math::rotate(.01f, math::vec3(0.f, 1.f, 0.f))
-            );
+            );*/
 
         sceneManager->nextFrame(time, deltaTime);
     });
