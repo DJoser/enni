@@ -33,6 +33,8 @@ gen
 res
 assets
 libs
+*.db
+*.opendb
 AndroidManifest.xml
 doc
 remove.me
