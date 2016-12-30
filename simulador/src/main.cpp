@@ -1,23 +1,29 @@
 #include "minko/Minko.hpp"
 #include "minko/MinkoSDL.hpp"
+#include "minko/MinkoHtmlOverlay.hpp"
 
 using namespace minko;
 using namespace minko::component;
 
 int main(int argc, char** argv)
 {
+	auto overlay = HtmlOverlay::create(argc, argv);
+
     auto canvas = Canvas::create("E.N.N.I.", 960, 540);
     auto sceneManager = SceneManager::create(canvas);
     auto assets = sceneManager->assets();
     auto defaultLoader = sceneManager->assets()->loader();
     auto root = scene::Node::create("root")
-        ->addComponent(sceneManager);
+        ->addComponent(sceneManager)
+		->addComponent(overlay);
 
     auto fxLoader = file::Loader::create(defaultLoader)
         ->queue("effect/Phong.effect")
         ->queue("effect/Basic.effect");
 
     scene::Node::Ptr cube = nullptr;
+
+	overlay->load("html/interface.html");
 
     auto fxComplete = fxLoader->complete()->connect([&](file::Loader::Ptr loader)
     {
