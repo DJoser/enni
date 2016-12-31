@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 
     scene::Node::Ptr cube = nullptr;
 
-	overlay->load("html/interface.html");
+	
 
     auto fxComplete = fxLoader->complete()->connect([&](file::Loader::Ptr loader)
     {
@@ -39,11 +39,12 @@ int main(int argc, char** argv)
                 }),
                 assets->effect("effect/Phong.effect")
             ));
+		overlay->load("html/interface.html");
         root->addChild(cube);
 
         auto camera = scene::Node::create("camera")
             ->addComponent(PerspectiveCamera::create(canvas->aspectRatio()))
-            ->addComponent(Renderer::create(0x7f7f7fff))
+            ->addComponent(Renderer::create(0xdcdcdcff))
             ->addComponent(Transform::create(math::inverse(math::lookAt(
                 math::vec3(2.f, 1.f, 2.f),
                 math::vec3(0.f, 0.f, 0.f),
