@@ -1,6 +1,7 @@
 #include "minko/Minko.hpp"
 #include "minko/MinkoSDL.hpp"
 #include "minko/MinkoHtmlOverlay.hpp"
+#include "SDL.h"
 
 using namespace minko;
 using namespace minko::component;
@@ -9,7 +10,7 @@ int main(int argc, char** argv)
 {
 	auto overlay = HtmlOverlay::create(argc, argv);
 
-    auto canvas = Canvas::create("E.N.N.I.", 960, 540);
+    auto canvas = Canvas::create("E.N.N.I.", 960, 540,Canvas::Flags::CHROMELESS);
     auto sceneManager = SceneManager::create(canvas);
     auto assets = sceneManager->assets();
     auto defaultLoader = sceneManager->assets()->loader();
@@ -70,6 +71,12 @@ int main(int argc, char** argv)
 			transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
 		if (k->keyIsDown(input::Keyboard::RIGHT))
 			transform->matrix(translate(math::vec3(.1f, 0.f, 0.f)) * transform->matrix());
+		if (k->keyIsDown(input::Keyboard::A)) {
+			SDL_MaximizeWindow(canvas->window());
+
+			//SDL_SetWindowPosition(canvas->window(), 0, 0);
+			//canvas->quit();
+		}
 	});
 
     auto enterFrame = canvas->enterFrame()->connect([&](Canvas::Ptr canvas, float time, float deltaTime)
