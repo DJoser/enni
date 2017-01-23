@@ -29,6 +29,8 @@ int main(int argc, char** argv)
 
     scene::Node::Ptr plano = nullptr;
 	scene::Node::Ptr cubo = nullptr;
+	scene::Node::Ptr cubo2 = nullptr;
+	scene::Node::Ptr camera = nullptr;
 
     auto fxComplete = fxLoader->complete()->connect([&](file::Loader::Ptr loader)
     {
@@ -77,14 +79,30 @@ int main(int argc, char** argv)
 			->addComponent(bullet::ColliderDebug::create(assets));
 		root->addChild(cubo);
 
-        auto camera = scene::Node::create("camera")
+
+		cubo2 = scene::Node::create("cubo2")
+			->addComponent(Transform::create(math::translate(math::vec3(0.f, 3.f, 0.f)) * math::mat4()))
+			->addComponent(Surface::create(
+				geometry::CubeGeometry::create(assets->context()),
+				material::Material::create()->set({
+					{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
+				}),
+				assets->effect("effect/Phong.effect")
+			))
+			->addComponent(bullet::Collider::create(
+				bullet::ColliderData::create(
+					1.f,
+					bullet::BoxShape::create(0.5f, 0.5f, 0.5f)
+				)
+			))
+			->addComponent(bullet::ColliderDebug::create(assets));
+		cubo->addChild(cubo2);
+
+
+        camera = scene::Node::create("camera")
             ->addComponent(PerspectiveCamera::create(canvas->aspectRatio()))
             ->addComponent(Renderer::create(0xdcdcdcff))
-            ->addComponent(Transform::create(math::inverse(math::lookAt(
-                math::vec3(2.f, 1.f, 2.f),
-                math::vec3(0.f, 0.f, 0.f),
-                math::vec3(0.f, 1.f, 0.f)
-            ))));
+            ->addComponent(Transform::create(math::translate(math::vec3(0.f,2.5f,10.f)) * math::mat4()));
         root->addChild(camera);
 
         auto lights = scene::Node::create("lights")
@@ -99,13 +117,31 @@ int main(int argc, char** argv)
     });
 
 	auto keyDown = canvas->keyboard()->keyDown()->connect([&](input::Keyboard::Ptr k) {
-		auto transform = plano->component<Transform>();
+		auto transform = camera->component<Transform>();
 
-		if (k->keyIsDown(input::Keyboard::LEFT))
-			transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
-		if (k->keyIsDown(input::Keyboard::RIGHT))
-			transform->matrix(translate(math::vec3(.1f, 0.f, 0.f)) * transform->matrix());
 		if (k->keyIsDown(input::Keyboard::A)) {
+			transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
+		}
+		if (k->keyIsDown(input::Keyboard::D)) {
+			transform->matrix(translate(math::vec3(.1f, 0.f, 0.f)) * transform->matrix());
+		}
+		if (k->keyIsDown(input::Keyboard::DOWN)) {
+			transform->matrix(translate(math::vec3(0.f, -.1f, 0.f)) * transform->matrix());
+		}
+		if (k->keyIsDown(input::Keyboard::UP)) {
+			transform->matrix(translate(math::vec3(0.f, .1f, 0.f)) * transform->matrix());
+		}
+		if (k->keyIsDown(input::Keyboard::W)) {
+			transform->matrix(translate(math::vec3(0.f, 0.f, -.1f)) * transform->matrix());
+		}
+		if (k->keyIsDown(input::Keyboard::S)) {
+			transform->matrix(translate(math::vec3(0.f, 0.f, .1f)) * transform->matrix());
+		}
+
+		if (k->keyIsDown(input::Keyboard::ESCAPE)) {
+			canvas->quit();
+		}
+		if (k->keyIsDown(input::Keyboard::F)) {
 			SDL_MaximizeWindow(canvas->window());
 		}
 		if (k->keyIsDown(input::Keyboard::P)) {
