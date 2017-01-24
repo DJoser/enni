@@ -11,7 +11,7 @@ minko.project.solution(PROJECT_NAME)
 
 		-- plugin
 		minko.plugin.enable("sdl")
-		--minko.plugin.enable("bullet")
+		minko.plugin.enable("bullet")
 		--minko.plugin.enable("jpeg")
 		--minko.plugin.enable("serializer")
 		--minko.plugin.enable("particles")
