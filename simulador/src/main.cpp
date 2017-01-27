@@ -2,6 +2,9 @@
 #include "minko/MinkoSDL.hpp"
 #include "minko/MinkoHtmlOverlay.hpp"
 #include "minko/MinkoBullet.hpp"
+#include "minko/MinkoASSIMP.hpp"
+#include "minko/MinkoJPEG.hpp"
+#include "minko/MinkoPNG.hpp"
 #include "SDL.h"
 
 using namespace minko;
@@ -17,15 +20,41 @@ int main(int argc, char** argv)
     auto sceneManager = SceneManager::create(canvas);
     auto assets = sceneManager->assets();
     auto defaultLoader = sceneManager->assets()->loader();
+
+	auto defaultOptions = defaultLoader->options();
+
+	// setup assets
+	defaultOptions
+		->generateMipmaps(true)
+		->skinningFramerate(60)
+		->skinningMethod(SkinningMethod::HARDWARE)
+		->startAnimation(true)
+		->registerParser<file::OBJParser>("obj")
+		->registerParser<file::ColladaParser>("dae")
+		->registerParser<file::BlenderParser>("blend")
+		->registerParser<file::PNGParser>("png")
+		->registerParser<file::JPEGParser>("jpg");
+	
     auto root = scene::Node::create("root")
         ->addComponent(sceneManager)
 		->addComponent(world)
 		->addComponent(overlay);
 
-    auto fxLoader = file::Loader::create(defaultLoader)
+	auto fxLoader = file::Loader::create(defaultLoader)
 		->queue("effect/Line.effect")
-        ->queue("effect/Phong.effect")
-        ->queue("effect/Basic.effect");
+		->queue("effect/Phong.effect")
+		->queue("effect/Basic.effect")
+		->queue("robot/tyson.dae")
+		/*->queue("robot/base_cuerpo.dae")
+		->queue("robot/base_motor_giratorio_p1.dae")
+		->queue("robot/base_motor_giratorio_p2.dae")
+		->queue("robot/base_principal.dae")
+		->queue("robot/brazo.dae")
+		->queue("robot/cuerpo.dae")
+		->queue("robot/eje_giratorio.dae")
+		->queue("robot/elevador.dae")
+		->queue("robot/tapa_frontal_cuerpo.dae")
+		->queue("robot/tapa_superior_cuerpo.dae")*/;
 
     scene::Node::Ptr plano = nullptr;
 	scene::Node::Ptr cubo = nullptr;
@@ -59,8 +88,8 @@ int main(int argc, char** argv)
 				)
 			))
 			->addComponent(bullet::ColliderDebug::create(assets));
-        root->addChild(plano);
-
+        //root->addChild(plano);
+		
 		cubo = scene::Node::create("cubo")
 			->addComponent(Transform::create(math::translate(math::vec3(0.f,1.f,0.f)) * math::mat4()))
 			->addComponent(Surface::create(
@@ -97,6 +126,11 @@ int main(int argc, char** argv)
 			))
 			->addComponent(bullet::ColliderDebug::create(assets));
 		cubo->addChild(cubo2);
+
+
+		auto model = sceneManager->assets()->symbol("robot/tyson.dae");
+		root->addChild(model);
+
 
 
         camera = scene::Node::create("camera")
