@@ -53,9 +53,22 @@ int main(int argc, char** argv)
 	scene::Node::Ptr cubo2 = nullptr;
 	scene::Node::Ptr camera = nullptr;
 
+	auto onloadSlot = overlay->onload()->connect([=](minko::dom::AbstractDOM::Ptr dom, std::string page)
+	{
+		auto filename = dom->fileName();
+
+		if (!dom->isMain())
+			return;
+
+		auto tituloPagina = dom->getElementById("logo-container");
+		tituloPagina->textContent("Hola mundo");
+		
+		auto contenido = dom->getElementById("logo-container")->textContent();
+	});
+
+	overlay->load("html/interface.html");
 	auto fxComplete = fxLoader->complete()->connect([&](file::Loader::Ptr loader)
 	{
-		overlay->load("html/interface.html");
 		defaultLoader->options()
 			->effect(assets->effect("effect/Phong.effect"));
 
