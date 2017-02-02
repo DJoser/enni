@@ -44,43 +44,33 @@ int main(int argc, char** argv)
 		->queue("effect/Line.effect")
 		->queue("effect/Phong.effect")
 		->queue("effect/Basic.effect")
-		->queue("robot/tyson.dae")
-		/*->queue("robot/base_cuerpo.dae")
-		->queue("robot/base_motor_giratorio_p1.dae")
-		->queue("robot/base_motor_giratorio_p2.dae")
-		->queue("robot/base_principal.dae")
-		->queue("robot/brazo.dae")
-		->queue("robot/cuerpo.dae")
-		->queue("robot/eje_giratorio.dae")
-		->queue("robot/elevador.dae")
-		->queue("robot/tapa_frontal_cuerpo.dae")
-		->queue("robot/tapa_superior_cuerpo.dae")*/;
+		->queue("robot/tyson.dae");
 
     scene::Node::Ptr plano = nullptr;
 	scene::Node::Ptr cubo = nullptr;
 	scene::Node::Ptr cubo2 = nullptr;
 	scene::Node::Ptr camera = nullptr;
 
-    auto fxComplete = fxLoader->complete()->connect([&](file::Loader::Ptr loader)
-    {
+	auto fxComplete = fxLoader->complete()->connect([&](file::Loader::Ptr loader)
+	{
 		overlay->load("html/interface.html");
-        defaultLoader->options()
-            ->effect(assets->effect("effect/Phong.effect"));
+		defaultLoader->options()
+			->effect(assets->effect("effect/Phong.effect"));
 
 		float GROUND_WIDTH = 5.f;
 		float GROUND_DEPTH = 5.f;
 		float GROUND_THICK = 0.1f;
 		auto planoMatrix = math::scale(math::vec3(GROUND_WIDTH, GROUND_THICK, GROUND_DEPTH)) * math::mat4();
 
-        plano = scene::Node::create("plano")
-            ->addComponent(Transform::create(planoMatrix))
-            ->addComponent(Surface::create(
-                geometry::CubeGeometry::create(assets->context()),
-                material::Material::create()->set({
-                    { "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
-                }),
-                assets->effect("effect/Phong.effect")
-            ))
+		plano = scene::Node::create("plano")
+			->addComponent(Transform::create(planoMatrix))
+			->addComponent(Surface::create(
+				geometry::CubeGeometry::create(assets->context()),
+				material::Material::create()->set({
+					{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
+		}),
+				assets->effect("effect/Phong.effect")
+			))
 			->addComponent(bullet::Collider::create(
 				bullet::ColliderData::create(
 					0.f, // static object (no mass)
@@ -88,26 +78,26 @@ int main(int argc, char** argv)
 				)
 			))
 			->addComponent(bullet::ColliderDebug::create(assets));
-        //root->addChild(plano);
-		
+		root->addChild(plano);
+
 		cubo = scene::Node::create("cubo")
-			->addComponent(Transform::create(math::translate(math::vec3(0.f,1.f,0.f)) * math::mat4()))
+			->addComponent(Transform::create(math::translate(math::vec3(0.f, 1.f, 0.f)) * math::mat4()))
 			->addComponent(Surface::create(
 				geometry::CubeGeometry::create(assets->context()),
 				material::Material::create()->set({
 					{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
 				}),
 				assets->effect("effect/Phong.effect")
-			))
-			->addComponent(bullet::Collider::create(
-				bullet::ColliderData::create(
-					1.f,
-					bullet::BoxShape::create(0.5f, 0.5f, 0.5f)
-				)
-			))
-			->addComponent(bullet::ColliderDebug::create(assets));
-		root->addChild(cubo);
+			));
 
+		cubo->addComponent(bullet::Collider::create(
+			bullet::ColliderData::create(
+				1.f,
+				bullet::BoxShape::create(0.5f, 0.5f, 0.5f)
+			)
+		));
+		cubo->addComponent(bullet::ColliderDebug::create(assets));
+		//root->addChild(cubo);
 
 		cubo2 = scene::Node::create("cubo2")
 			->addComponent(Transform::create(math::translate(math::vec3(0.f, 3.f, 0.f)) * math::mat4()))
@@ -117,16 +107,16 @@ int main(int argc, char** argv)
 					{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
 				}),
 				assets->effect("effect/Phong.effect")
-			))
-			->addComponent(bullet::Collider::create(
+			))->addComponent(bullet::Collider::create(
 				bullet::ColliderData::create(
 					1.f,
 					bullet::BoxShape::create(0.5f, 0.5f, 0.5f)
 				)
 			))
 			->addComponent(bullet::ColliderDebug::create(assets));
-		cubo->addChild(cubo2);
+		//cubo->addChild(cubo2);
 
+		//world->addConstraint(cubo->component<bullet::Collider>(), cubo2->component<bullet::Collider>());
 
 		auto model = sceneManager->assets()->symbol("robot/tyson.dae");
 		root->addChild(model);
