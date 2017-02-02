@@ -35,13 +35,32 @@ private:
 		int _minPosition = 0;
 		int _maxPosition = 65535;
 		int _currentPosition = 0;
-		ModuloCfg c_onfiguracion;
+		ModuloCfg _configuracion;
 	public:
 		Module(ModuloCfg cfg) {
-
+			_configuracion = cfg;
 		}
-		void configurar() {
-
+		void configurar(ofArduino* arduino) {
+			arduino->sendDigitalPinMode(_configuracion.f_carrea1, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.f_carrea2, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.motor_negativo, ARD_OUTPUT);
+			arduino->sendDigitalPinMode(_configuracion.motor_positivo, ARD_OUTPUT);
+			arduino->sendDigitalPinMode(_configuracion.b0, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b1, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b2, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b3, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b4, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b5, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b6, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b7, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b8, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b9, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b10, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b11, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b12, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b13, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b14, ARD_INPUT);
+			arduino->sendDigitalPinMode(_configuracion.b15, ARD_INPUT);
 		}
 	};
 	typedef std::shared_ptr<Module> ModulePtr;
