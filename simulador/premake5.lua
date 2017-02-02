@@ -6,7 +6,7 @@ minko.project.solution(PROJECT_NAME)
 
 	minko.project.application(PROJECT_NAME)
 
-		files { "src/**.cpp", "src/**.hpp", "asset/**" }
+		files { "src/**.cpp", "src/**.hpp", "asset/**", "src/**.h" }
 		includedirs { "src" }
 
 		-- plugin

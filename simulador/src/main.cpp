@@ -6,6 +6,8 @@
 #include "minko/MinkoJPEG.hpp"
 #include "minko/MinkoPNG.hpp"
 #include "SDL.h"
+#include "openFrameworks/ofSerial.h"
+#include "openFrameworks/ofArduino.h"
 
 using namespace minko;
 using namespace minko::component;
