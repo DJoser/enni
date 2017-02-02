@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include "openFrameworks\ofArduino.h"
+#include "robot\IRobotController.h"
 
 typedef struct ModuloCfg {
 	int f_carrea1 = -1;
@@ -24,7 +25,7 @@ typedef struct ModuloCfg {
 	int b14 = -1;
 	int b15 = -1;
 };
-class Robot
+class Robot : public IRobotController
 {
 private:
 	bool _robotConected = true;
@@ -101,5 +102,23 @@ public:
 		if (!_robotConected)
 			return 0.0;	
 	}
+
+	void ClearPositionX() {};
+	void MoveInitialX() {};
+	void MoveFinalX() {};
+	double PositionX() { return 0; };
+	void PositionX(double valor) { };
+
+	void ClearPositionY() {};
+	void MoveInitialY() {};
+	void MoveFinalY() {};
+	double PositionY() { return 0; };
+	void PositionY(double valor) { };
+
+	void ClearPositionZ() {};
+	void MoveInitialZ() {};
+	void MoveFinalZ() {};
+	double PositionZ() { return 0; };
+	void PositionZ(double valor) { };
 };
 
