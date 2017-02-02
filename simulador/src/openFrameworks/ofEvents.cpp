@@ -6,57 +6,67 @@ static ofEventArgs voidEventArgs;
 
 //--------------------------------------
 void ofSetFrameRate(int targetRate){
-	ofEvents().setFrameRate(targetRate);
+	//ofEvents().setFrameRate(targetRate);
 }
 
 //--------------------------------------
 float ofGetFrameRate(){
-	return ofEvents().getFrameRate();
+	//return ofEvents().getFrameRate();
+	return 0.f;
 }
 
 //--------------------------------------
 float ofGetTargetFrameRate(){
-	return ofEvents().getTargetFrameRate();
+	//return ofEvents().getTargetFrameRate();
+	return 0;
 }
 
 //--------------------------------------
 double ofGetLastFrameTime(){
-	return ofEvents().getLastFrameTime();
+	//return ofEvents().getLastFrameTime();
+	return 0;
 }
 
 //--------------------------------------
 uint64_t ofGetFrameNum(){
-	return ofEvents().getFrameNum();
+	//return ofEvents().getFrameNum();
+	return 0.f;
 }
 
 //--------------------------------------
 bool ofGetMousePressed(int button){ //by default any button
-	return ofEvents().getMousePressed(button);
+	//return ofEvents().getMousePressed(button);
+	return false;
 }
 
 //--------------------------------------
 bool ofGetKeyPressed(int key){
-	return ofEvents().getKeyPressed(key);
+	//return ofEvents().getKeyPressed(key);
+	return false;
 }
 
 //--------------------------------------
 int ofGetMouseX(){
-	return ofEvents().getMouseX();
+	//return ofEvents().getMouseX();
+	return 0;
 }
 
 //--------------------------------------
 int ofGetMouseY(){
-	return ofEvents().getMouseY();
+	//return ofEvents().getMouseY();
+	return 0;
 }
 
 //--------------------------------------
 int ofGetPreviousMouseX(){
-	return ofEvents().getPreviousMouseX();
+	//return ofEvents().getPreviousMouseX();
+	return 0;
 }
 
 //--------------------------------------
 int ofGetPreviousMouseY(){
-	return ofEvents().getPreviousMouseY();
+	//return ofEvents().getPreviousMouseY();
+	return 0;
 }
 
 ofCoreEvents::ofCoreEvents()
@@ -79,20 +89,7 @@ void ofCoreEvents::disable(){
 	exit.disable();
 	keyPressed.disable();
 	keyReleased.disable();
-	mouseDragged.disable();
-	mouseReleased.disable();
-	mousePressed.disable();
-	mouseMoved.disable();
-	mouseScrolled.disable();
-	mouseEntered.disable();
-	mouseExited.disable();
-	touchDown.disable();
-	touchUp.disable();
-	touchMoved.disable();
-	touchDoubleTap.disable();
-	touchCancelled.disable();
 	messageEvent.disable();
-	fileDragEvent.disable();
 }
 
 //------------------------------------------
@@ -103,20 +100,7 @@ void ofCoreEvents::enable(){
 	exit.enable();
 	keyPressed.enable();
 	keyReleased.enable();
-	mouseDragged.enable();
-	mouseReleased.enable();
-	mousePressed.enable();
-	mouseMoved.enable();
-	mouseScrolled.enable();
-	mouseEntered.enable();
-	mouseExited.enable();
-	touchDown.enable();
-	touchUp.enable();
-	touchMoved.enable();
-	touchDoubleTap.enable();
-	touchCancelled.enable();
 	messageEvent.enable();
-	fileDragEvent.enable();
 }
 
 //--------------------------------------
@@ -193,7 +177,7 @@ void ofCoreEvents::notifySetup(){
 	ofNotifyEvent( setup, voidEventArgs );
 }
 
-#include "ofGraphics.h"
+
 //------------------------------------------
 void ofCoreEvents::notifyUpdate(){
 	ofNotifyEvent( update, voidEventArgs );
@@ -296,128 +280,6 @@ void ofCoreEvents::notifyKeyEvent(const ofKeyEventArgs & keyEvent){
 }
 
 //------------------------------------------
-void ofCoreEvents::notifyMouseEvent(const ofMouseEventArgs & mouseEvent){
-	switch(mouseEvent.type){
-		case ofMouseEventArgs::Moved:
-			notifyMouseMoved(mouseEvent.x,mouseEvent.y);
-			break;
-		case ofMouseEventArgs::Dragged:
-			notifyMouseDragged(mouseEvent.x,mouseEvent.y,mouseEvent.button);
-			break;
-		case ofMouseEventArgs::Pressed:
-			notifyMousePressed(mouseEvent.x,mouseEvent.y,mouseEvent.button);
-			break;
-		case ofMouseEventArgs::Released:
-			notifyMouseReleased(mouseEvent.x,mouseEvent.y,mouseEvent.button);
-			break;
-		case ofMouseEventArgs::Scrolled:
-			notifyMouseScrolled(mouseEvent.x,mouseEvent.y,mouseEvent.scrollX,mouseEvent.scrollY);
-			break;
-		case ofMouseEventArgs::Entered:
-			notifyMouseEntered(mouseEvent.x,mouseEvent.y);
-			break;
-		case ofMouseEventArgs::Exited:
-			notifyMouseExited(mouseEvent.x,mouseEvent.y);
-			break;
-	}
-}
-
-//------------------------------------------
-void ofCoreEvents::notifyMousePressed(int x, int y, int button){
-    if( bPreMouseNotSet ){
-		previousMouseX	= x;
-		previousMouseY	= y;
-		bPreMouseNotSet	= false;
-	}else{
-		previousMouseX = currentMouseX;
-		previousMouseY = currentMouseY;
-	}
-    
-	currentMouseX = x;
-	currentMouseY = y;
-	pressedMouseButtons.insert(button);
-
-
-	ofMouseEventArgs mouseEventArgs(ofMouseEventArgs::Pressed,x,y,button);
-	ofNotifyEvent( mousePressed, mouseEventArgs );
-}
-
-//------------------------------------------
-void ofCoreEvents::notifyMouseReleased(int x, int y, int button){
-	if( bPreMouseNotSet ){
-		previousMouseX	= x;
-		previousMouseY	= y;
-		bPreMouseNotSet	= false;
-	}else{
-		previousMouseX = currentMouseX;
-		previousMouseY = currentMouseY;
-	}
-
-	currentMouseX = x;
-	currentMouseY = y;
-	pressedMouseButtons.erase(button);
-
-	ofMouseEventArgs mouseEventArgs(ofMouseEventArgs::Released,x,y,button);
-	ofNotifyEvent( mouseReleased, mouseEventArgs );
-}
-
-//------------------------------------------
-void ofCoreEvents::notifyMouseDragged(int x, int y, int button){
-	if( bPreMouseNotSet ){
-		previousMouseX	= x;
-		previousMouseY	= y;
-		bPreMouseNotSet	= false;
-	}else{
-		previousMouseX = currentMouseX;
-		previousMouseY = currentMouseY;
-	}
-
-	currentMouseX = x;
-	currentMouseY = y;
-
-	ofMouseEventArgs mouseEventArgs(ofMouseEventArgs::Dragged,x,y,button);
-	ofNotifyEvent( mouseDragged, mouseEventArgs );
-}
-
-//------------------------------------------
-void ofCoreEvents::notifyMouseMoved(int x, int y){
-	if( bPreMouseNotSet ){
-		previousMouseX	= x;
-		previousMouseY	= y;
-		bPreMouseNotSet	= false;
-	}else{
-		previousMouseX = currentMouseX;
-		previousMouseY = currentMouseY;
-	}
-
-	currentMouseX = x;
-	currentMouseY = y;
-
-	ofMouseEventArgs mouseEventArgs(ofMouseEventArgs::Moved,x,y,0);
-	ofNotifyEvent( mouseMoved, mouseEventArgs );
-}
-
-//------------------------------------------
-void ofCoreEvents::notifyMouseScrolled(int x, int y, float scrollX, float scrollY){
-	ofMouseEventArgs mouseEventArgs(ofMouseEventArgs::Scrolled,x,y);
-	mouseEventArgs.scrollX = scrollX;
-	mouseEventArgs.scrollY = scrollY;
-	ofNotifyEvent( mouseScrolled, mouseEventArgs );
-}
-
-//------------------------------------------
-void ofCoreEvents::notifyMouseEntered(int x, int y){
-	ofMouseEventArgs mouseEventArgs(ofMouseEventArgs::Entered,x,y);
-	ofNotifyEvent( mouseEntered, mouseEventArgs );
-}
-
-//------------------------------------------
-void ofCoreEvents::notifyMouseExited(int x, int y){
-	ofMouseEventArgs mouseEventArgs(ofMouseEventArgs::Exited,x,y);
-	ofNotifyEvent( mouseExited, mouseEventArgs );
-}
-
-//------------------------------------------
 void ofCoreEvents::notifyExit(){
 	ofNotifyEvent( exit, voidEventArgs );
 }
@@ -429,13 +291,8 @@ void ofCoreEvents::notifyWindowResized(int width, int height){
 }
 
 //------------------------------------------
-void ofCoreEvents::notifyDragEvent(ofDragInfo info){
-	ofNotifyEvent(fileDragEvent, info);
-}
-
-//------------------------------------------
 void ofSendMessage(ofMessage msg){
-	ofNotifyEvent(ofEvents().messageEvent, msg);
+	//ofNotifyEvent(ofEvents().messageEvent, msg);
 }
 
 //------------------------------------------

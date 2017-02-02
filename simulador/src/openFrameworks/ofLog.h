@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ofConstants.h"
-#include "ofFileUtils.h"
 #include "ofTypes.h"
 
 /// \file
@@ -197,11 +196,6 @@ string ofGetLogLevelName(ofLogLevel level, bool pad=false);
 /// \{
 
 class ofBaseLoggerChannel;
-
-/// \brief Set the logging to output to a file instead of the console.
-/// \param path The path to the log file to use.
-/// \param append True if you want to append to the existing file.
-void ofLogToFile(const string & path, bool append=false);
 
 /// \brief Set the logging to ouptut to the console.
 /// 
@@ -634,29 +628,6 @@ class ofFileLoggerChannel: public ofBaseLoggerChannel{
 public:
 	/// \brief Create an ofFileLoggerChannel.
 	ofFileLoggerChannel();
-	
-	/// \brief Create an ofFileLoggerChannel with parameters.
-	/// \param path The file path for the log file.
-	/// \param append True if the log data should be added to an existing file.
-	ofFileLoggerChannel(const string & path, bool append);
-
-	/// \brief Destroy the file logger channel.
-	virtual ~ofFileLoggerChannel();
-
-	/// \brief Set the log file.
-	/// \param path The file path for the log file.
-	/// \param append True if the log data should be added to an existing file.
-	void setFile(const string & path,bool append=false);
-
-	void log(ofLogLevel level, const string & module, const string & message);
-	void log(ofLogLevel level, const string & module, const char* format, ...) OF_PRINTF_ATTR(4, 5);
-	void log(ofLogLevel level, const string & module, const char* format, va_list args);
-
-	/// \brief CLose the log file.
-	void close();
-
-private:
-	ofFile file; ///< The location of the log file.
 	
 };
 

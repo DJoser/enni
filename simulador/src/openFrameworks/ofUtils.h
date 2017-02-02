@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ofConstants.h"
-#include "utf8.h"
+//#include "utf8.h"
+#include "utf8cpp\include\utf8.h"
 #include <bitset> // For ofToBinary.
 
 #include "ofLog.h"
@@ -9,45 +10,6 @@
 #ifdef TARGET_WIN32	 // For ofLaunchBrowser.
 	#include <shellapi.h>
 #endif
-
-/// \name Elapsed Time
-/// \{
-
-/// \brief Reset the elapsed time counter.
-///
-/// This method resets the times returned by ofGetElapsedTimef(),
-/// ofGetElapsedTimeMillis() and ofGetElapsedTimeMicros() to zero.
-///
-/// \note This is called on the first frame during app startup.
-void ofResetElapsedTimeCounter();
-
-/// \brief Get the elapsed time in seconds.
-///
-/// This returns the elapsed time since ofResetElapsedTimeCounter() was called.
-/// Usually ofResetElapsedTimeCounter() is called automatically once during
-/// program startup.
-///
-/// \returns the floating point elapsed time in seconds.
-float ofGetElapsedTimef();
-
-
-/// \brief Get the elapsed time in milliseconds.
-///
-/// This returns the elapsed time since ofResetElapsedTimeCounter() was called.
-/// Usually ofResetElapsedTimeCounter() is called automatically once during
-/// program startup.
-///
-/// \returns the elapsed time in milliseconds (1000 milliseconds = 1 second).
-uint64_t ofGetElapsedTimeMillis();
-
-/// \brief Get the elapsed time in microseconds.
-///
-/// This returns the elapsed time since ofResetElapsedTimeCounter() was called.
-/// Usually ofResetElapsedTimeCounter() is called automatically upon program
-/// startup.
-///
-/// \returns the elapsed time in microseconds (1000000 microseconds = 1 second).
-uint64_t ofGetElapsedTimeMicros();
 
 /// \brief Get the number of frames rendered since the program started.
 /// \returns the number of frames rendered since the program started.
@@ -152,56 +114,6 @@ int ofGetDay();
 ///
 /// \returns the current weekday [0-6].
 int ofGetWeekday();
-
-/// \}
-
-/// \name Data Path
-/// \{
-
-/// \brief Enable the use of the data path.
-///
-/// This function causes ofToDataPath() to respect the relative path set
-/// with ofSetDataPathRoot().  This is enabled by default.
-void ofEnableDataPath();
-
-/// \brief Disable the use of the data path.
-///
-/// This function causes ofToDataPath() to ignore the relative path set
-/// with ofSetDataPathRoot().
-void ofDisableDataPath();
-
-/// \brief Make a path relative to the location of the data/ folder.
-///
-/// This funtion returns path unchanged if ofDisableDataPath() was called first.
-///
-/// By default, a relative path is returned. Users requiring absolute paths for
-/// (e.g. for non-openFrameworks functions), can specify that an absolute path
-/// be returned.
-///
-/// \param path The path to make relative to the data/ folder.
-/// \param absolute Set to true to return an absolute path.
-/// \returns the new path, unless paths were disabled with ofDisableDataPath().
-string ofToDataPath(const string& path, bool absolute=false);
-
-/// \brief Reset the working directory to the platform default.
-///
-/// The default working directory is where the application was started from
-/// or the exe directory in case of osx bundles. GLUT might change the default
-/// working directory to the resources directory in the bundle in osx. This
-/// will restore it to the exe dir or whatever was the current dir when the
-/// application was started
-bool ofRestoreWorkingDirectoryToDefault();
-
-/// \brief Set the relative path to the data/ folder from the executable.
-///
-/// This method can be useful when users want to embed the data as a resource
-/// folder within an *.app bundle on OSX or perhaps work from a shared data
-/// folder in the user's Documents directory.
-///
-/// \warning The provided path must have a trailing slash (/).
-/// \param root The path to the data/ folder relative to the app executable.
-void ofSetDataPathRoot(const string& root);
-
 
 /// \}
 
@@ -854,17 +766,7 @@ std::string ofGetVersionPreRelease();
 /// \{
 
 
-/// \brief Saves the current screen image to a file on disk.
-///
-/// Example:
-/// ~~~~{.cpp}
-///		ofSaveScreen("screen.png"); // Will save screen.png in the /data folder.
-/// ~~~~
-///
-/// The output file type will be deduced from the given file name.
-///
-/// \param filename The image output file.
-void ofSaveScreen(const string& filename);
+
 
 /// \brief Saves the current frame as a PNG image.
 ///
@@ -873,27 +775,11 @@ void ofSaveScreen(const string& filename);
 ///
 /// \param bUseViewport Set to true if the current viewport should be used.
 void ofSaveFrame(bool bUseViewport = false);
-
-/// \brief Saves the current viewport as an image.
-///
-/// The output file type will be deduced from the given file name.
-///
-/// \param filename The image output file.
-void ofSaveViewport(const string& filename);
-
-
 /// \}
 
 /// \name System
 /// \{
 
-/// \brief Launch the given URL in the default browser.
-/// \param url the URL to open.
-/// \param uriEncodeQuery true if the query parameters in the given URL have
-/// already been URL encoded.
-#ifndef TARGET_EMSCRIPTEN
-void ofLaunchBrowser(const string& url, bool uriEncodeQuery=false);
-#endif
 
 /// \brief Executes a system command. Similar to run a command in terminal.
 /// \note Will block until the executed program/command has finished.
@@ -930,15 +816,3 @@ private:
 };
 
 /// \}
-
-
-
-/*! \cond PRIVATE */
-namespace of{
-namespace priv{
-    void setWorkingDirectoryToDefault();
-    void initutils();
-    void endutils();
-}
-}
-/*! \endcond */

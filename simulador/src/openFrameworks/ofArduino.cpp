@@ -145,7 +145,7 @@ void ofArduino::initPins() const {
 }
 
 bool ofArduino::connect(const std::string & device, int baud){
-	connectTime = ofGetElapsedTimef();
+	//connectTime = ofGetElapsedTimef();
 	_initialized = false;
 	_port.listDevices();
 	connected = _port.setup(device.c_str(), baud);
@@ -156,10 +156,10 @@ bool ofArduino::connect(const std::string & device, int baud){
 // the preferred method is to listen for the EInitialized event in your application
 bool ofArduino::isArduinoReady() const {
 	if(bUseDelay){
-		if(_initialized || (ofGetElapsedTimef() - connectTime) > OF_ARDUINO_DELAY_LENGTH){
+		//if(_initialized || (ofGetElapsedTimef() - connectTime) > OF_ARDUINO_DELAY_LENGTH){
 			initPins();
 			connected = true;
-		}
+		//}
 	}
 	return connected;
 }

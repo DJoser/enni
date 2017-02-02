@@ -1,14 +1,8 @@
 #include "ofUtils.h"
-#include "ofImage.h"
-#include "ofFileUtils.h"
 
 #include <chrono>
 #include <numeric>
 #include <locale>
-
-#if !defined(TARGET_EMSCRIPTEN)
-#include "Poco/URI.h"
-#endif
 
 
 #ifdef TARGET_WIN32
@@ -52,65 +46,6 @@
 	#define MAXPATHLEN 1024
 #endif
 
-namespace{
-    bool enableDataPath = true;
-    uint64_t startTimeSeconds;   //  better at the first frame ?? (currently, there is some delay from static init, to running.
-    uint64_t startTimeNanos;
-#ifdef TARGET_OSX
-    clock_serv_t cs;
-#endif
-
-    //--------------------------------------------------
-    string defaultDataPath(){
-    #if defined TARGET_OSX
-        try{
-            return std::filesystem::canonical(ofFilePath::join(ofFilePath::getCurrentExeDir(),  "../../../data/")).string();
-        }catch(...){
-            return ofFilePath::join(ofFilePath::getCurrentExeDir(),  "../../../data/");
-        }
-    #elif defined TARGET_ANDROID
-            return string("sdcard/");
-    #else
-            try{
-                return std::filesystem::canonical(ofFilePath::join(ofFilePath::getCurrentExeDir(),  "data/")).string();
-            }catch(...){
-                return ofFilePath::join(ofFilePath::getCurrentExeDir(),  "data/");
-            }
-    #endif
-    }
-
-    //--------------------------------------------------
-    std::filesystem::path & defaultWorkingDirectory(){
-            static auto * defaultWorkingDirectory = new std::filesystem::path();
-            return * defaultWorkingDirectory;
-    }
-
-    //--------------------------------------------------
-    std::filesystem::path & dataPathRoot(){
-            static auto * dataPathRoot = new std::filesystem::path(defaultDataPath());
-            return *dataPathRoot;
-    }
-}
-
-namespace of{
-namespace priv{
-    void initutils(){
-#ifdef TARGET_OSX
-        host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cs);
-#endif
-        defaultWorkingDirectory() = std::filesystem::absolute(std::filesystem::current_path());
-        ofResetElapsedTimeCounter();
-        ofSeedRandom();
-    }
-
-    void endutils(){
-#ifdef TARGET_OSX
-        mach_port_deallocate(mach_task_self(), cs);
-#endif
-    }
-}
-}
-
 //--------------------------------------
 void ofGetMonotonicTime(uint64_t & seconds, uint64_t & nanoseconds){
 #if (defined(TARGET_LINUX) && !defined(TARGET_RASPBERRY_PI)) || defined(TARGET_EMSCRIPTEN)
@@ -138,35 +73,6 @@ void ofGetMonotonicTime(uint64_t & seconds, uint64_t & nanoseconds){
 #endif
 }
 
-
-//--------------------------------------
-uint64_t ofGetElapsedTimeMillis(){
-    uint64_t seconds;
-    uint64_t nanos;
-	ofGetMonotonicTime(seconds,nanos);
-	return (seconds - startTimeSeconds)*1000 + ((long long)(nanos - startTimeNanos))/1000000;
-}
-
-//--------------------------------------
-uint64_t ofGetElapsedTimeMicros(){
-    uint64_t seconds;
-    uint64_t nanos;
-	ofGetMonotonicTime(seconds,nanos);
-	return (seconds - startTimeSeconds)*1000000 + ((long long)(nanos - startTimeNanos))/1000;
-}
-
-//--------------------------------------
-float ofGetElapsedTimef(){
-    uint64_t seconds;
-    uint64_t nanos;
-	ofGetMonotonicTime(seconds,nanos);
-	return (seconds - startTimeSeconds) + ((long long)(nanos - startTimeNanos))/1000000000.;
-}
-
-//--------------------------------------
-void ofResetElapsedTimeCounter(){
-	ofGetMonotonicTime(startTimeSeconds,startTimeNanos);
-}
 
 //=======================================
 // this is from freeglut, and used internally:
@@ -305,113 +211,6 @@ int ofGetWeekday(){
   local   =*(localtime(&curr));
   return local.tm_wday;
 }
-
-//--------------------------------------------------
-void ofEnableDataPath(){
-	enableDataPath = true;
-}
-
-//--------------------------------------------------
-void ofDisableDataPath(){
-	enableDataPath = false;
-}
-
-//--------------------------------------------------
-bool ofRestoreWorkingDirectoryToDefault(){
-    try{
-        std::filesystem::current_path(defaultWorkingDirectory());
-        return true;
-    }catch(...){
-        return false;
-    }
-}
-
-//--------------------------------------------------
-void ofSetDataPathRoot(const string& newRoot){
-	dataPathRoot() = newRoot;
-}
-
-//--------------------------------------------------
-string ofToDataPath(const string& path, bool makeAbsolute){
-	if (!enableDataPath)
-		return path;
-
-    bool hasTrailingSlash = !path.empty() && std::filesystem::path(path).generic_string().back()=='/';
-
-	// if our Current Working Directory has changed (e.g. file open dialog)
-#ifdef TARGET_WIN32
-	if (defaultWorkingDirectory() != std::filesystem::current_path()) {
-		// change our cwd back to where it was on app load
-		bool ret = ofRestoreWorkingDirectoryToDefault();
-		if(!ret){
-			ofLogWarning("ofUtils") << "ofToDataPath: error while trying to change back to default working directory " << defaultWorkingDirectory();
-		}
-	}
-#endif
-
-	// this could be performed here, or wherever we might think we accidentally change the cwd, e.g. after file dialogs on windows
-	const auto  & dataPath = dataPathRoot();
-	std::filesystem::path inputPath(path);
-	std::filesystem::path outputPath;
-
-	// if path is already absolute, just return it
-	if (inputPath.is_absolute()) {
-		try {
-            auto outpath = std::filesystem::canonical(inputPath);
-            if(std::filesystem::is_directory(outpath) && hasTrailingSlash){
-                return ofFilePath::addTrailingSlash(outpath.string());
-            }else{
-                return outpath.string();
-            }
-		}
-		catch (...) {
-            return inputPath.string();
-		}
-	}
-
-	// here we check whether path already refers to the data folder by looking for common elements
-	// if the path begins with the full contents of dataPathRoot then the data path has already been added
-	// we compare inputPath.toString() rather that the input var path to ensure common formatting against dataPath.toString()
-    auto dirDataPath = dataPath.string();
-	// also, we strip the trailing slash from dataPath since `path` may be input as a file formatted path even if it is a folder (i.e. missing trailing slash)
-    dirDataPath = ofFilePath::addTrailingSlash(dirDataPath);
-
-    auto relativeDirDataPath = ofFilePath::makeRelative(std::filesystem::current_path().string(),dataPath.string());
-    relativeDirDataPath  = ofFilePath::addTrailingSlash(relativeDirDataPath);
-
-    if (inputPath.string().find(dirDataPath) != 0 && inputPath.string().find(relativeDirDataPath)!=0) {
-		// inputPath doesn't contain data path already, so we build the output path as the inputPath relative to the dataPath
-	    if(makeAbsolute){
-            outputPath = dirDataPath / inputPath;
-	    }else{
-            outputPath = relativeDirDataPath / inputPath;
-	    }
-	} else {
-		// inputPath already contains data path, so no need to change
-		outputPath = inputPath;
-	}
-
-    // finally, if we do want an absolute path and we don't already have one
-	if(makeAbsolute){
-	    // then we return the absolute form of the path
-	    try {
-            auto outpath = std::filesystem::canonical(std::filesystem::absolute(outputPath));
-            if(std::filesystem::is_directory(outpath) && hasTrailingSlash){
-                return ofFilePath::addTrailingSlash(outpath.string());
-            }else{
-                return outpath.string();
-            }
-	    }
-	    catch (std::exception &) {
-            return std::filesystem::absolute(outputPath).string();
-	    }
-	}else{
-		// or output the relative path
-        return outputPath.string();
-	}
-}
-
-
 //----------------------------------------
 template<>
 string ofFromString(const string& value){
@@ -848,62 +647,6 @@ string ofVAArgsToString(const char * format, va_list args){
 	return retStr;
 }
 
-#ifndef TARGET_EMSCRIPTEN
-//--------------------------------------------------
-void ofLaunchBrowser(const string& url, bool uriEncodeQuery){
-	Poco::URI uri;
-	try {
-		uri = Poco::URI(url);
-	} catch(const std::exception & exc) {
-		ofLogError("ofUtils") << "ofLaunchBrowser(): malformed url \"" << url << "\": " << exc.what();
-		return;
-	}
-
-	if(uriEncodeQuery) {
-		uri.setQuery(uri.getRawQuery()); // URI encodes during set
-	}
-
-	// http://support.microsoft.com/kb/224816
-	// make sure it is a properly formatted url:
-	//   some platforms, like Android, require urls to start with lower-case http/https
-	//   Poco::URI automatically converts the scheme to lower case
-	if(uri.getScheme() != "http" && uri.getScheme() != "https"){
-		ofLogError("ofUtils") << "ofLaunchBrowser(): url does not begin with http:// or https://: \"" << uri.toString() << "\"";
-		return;
-	}
-
-	#ifdef TARGET_WIN32
-		ShellExecuteA(nullptr, "open", uri.toString().c_str(),
-                nullptr, nullptr, SW_SHOWNORMAL);
-	#endif
-
-	#ifdef TARGET_OSX
-        // could also do with LSOpenCFURLRef
-		string commandStr = "open \"" + uri.toString() + "\"";
-		int ret = system(commandStr.c_str());
-        if(ret!=0) {
-			ofLogError("ofUtils") << "ofLaunchBrowser(): couldn't open browser, commandStr \"" << commandStr << "\"";
-		}
-	#endif
-
-	#ifdef TARGET_LINUX
-		string commandStr = "xdg-open \"" + uri.toString() + "\"";
-		int ret = system(commandStr.c_str());
-		if(ret!=0) {
-			ofLogError("ofUtils") << "ofLaunchBrowser(): couldn't open browser, commandStr \"" << commandStr << "\"";
-		}
-	#endif
-
-	#ifdef TARGET_OF_IOS
-		ofxiOSLaunchBrowser(uri.toString());
-	#endif
-
-	#ifdef TARGET_ANDROID
-		ofxAndroidLaunchBrowser(uri.toString());
-	#endif
-}
-#endif
-
 //--------------------------------------------------
 string ofGetVersionInfo(){
 	stringstream sstr;
@@ -932,47 +675,6 @@ unsigned int ofGetVersionPatch() {
 
 std::string ofGetVersionPreRelease() {
 	return OF_VERSION_PRE_RELEASE;
-}
-
-
-//---- new to 006
-//from the forums http://www.openframeworks.cc/forum/viewtopic.php?t=1413
-
-//--------------------------------------------------
-void ofSaveScreen(const string& filename) {
-   /*ofImage screen;
-   screen.allocate(ofGetWidth(), ofGetHeight(), OF_IMAGE_COLOR);
-   screen.grabScreen(0, 0, ofGetWidth(), ofGetHeight());
-   screen.save(filename);*/
-	ofPixels pixels;
-	ofGetGLRenderer()->saveFullViewport(pixels);
-	ofSaveImage(pixels,filename);
-}
-
-//--------------------------------------------------
-void ofSaveViewport(const string& filename) {
-	// because ofSaveScreen doesn't related to viewports
-	/*ofImage screen;
-	ofRectangle view = ofGetCurrentViewport();
-	screen.allocate(view.width, view.height, OF_IMAGE_COLOR);
-	screen.grabScreen(0, 0, view.width, view.height);
-	screen.save(filename);*/
-
-	ofPixels pixels;
-	ofGetGLRenderer()->saveFullViewport(pixels);
-	ofSaveImage(pixels,filename);
-}
-
-//--------------------------------------------------
-int saveImageCounter = 0;
-void ofSaveFrame(bool bUseViewport){
-   string fileName = ofToString(saveImageCounter) + ".png";
-	if (bUseViewport){
-		ofSaveViewport(fileName);
-	} else {
-		ofSaveScreen(fileName);
-	}
-	saveImageCounter++;
 }
 
 //--------------------------------------------------

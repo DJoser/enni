@@ -7,7 +7,7 @@
 #include "ofxAndroidUtils.h"
 #endif
 
-
+/*
 //-------------------------------------------------
 ofThread::ofThread()
 :_threadRunning(false)
@@ -205,4 +205,4 @@ void ofThread::run(){
 #ifdef TARGET_ANDROID
 	attachResult = ofGetJavaVMPtr()->DetachCurrentThread();
 #endif
-}
+}*/

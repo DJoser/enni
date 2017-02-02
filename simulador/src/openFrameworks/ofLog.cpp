@@ -1,6 +1,6 @@
 #include "ofLog.h"
 #include "ofConstants.h"
-#include <ofUtils.h>
+#include "ofUtils.h"
 #include <map>
 
 static ofLogLevel currentLogLevel =  OF_LOG_NOTICE;
@@ -34,11 +34,6 @@ void ofSetLogLevel(string module, ofLogLevel level){
 //--------------------------------------------------
 ofLogLevel ofGetLogLevel(){
 	return currentLogLevel;
-}
-
-//--------------------------------------------------
-void ofLogToFile(const string & path, bool append){
-	ofLog::setChannel(shared_ptr<ofFileLoggerChannel>(new ofFileLoggerChannel(path,append)));
 }
 
 //--------------------------------------------------
@@ -285,44 +280,4 @@ void ofConsoleLoggerChannel::log(ofLogLevel level, const string & module, const 
 ofFileLoggerChannel::ofFileLoggerChannel(){
 }
 
-ofFileLoggerChannel::ofFileLoggerChannel(const string & path, bool append){
-	setFile(path,append);
-}
 
-ofFileLoggerChannel::~ofFileLoggerChannel(){
-	close();
-}
-
-void ofFileLoggerChannel::close(){
-	file.close();
-}
-
-void ofFileLoggerChannel::setFile(const string & path,bool append){
-	file.open(path,append?ofFile::Append:ofFile::WriteOnly);
-	file << endl;
-	file << endl;
-	file << "--------------------------------------- " << ofGetTimestampString() << endl;
-}
-
-void ofFileLoggerChannel::log(ofLogLevel level, const string & module, const string & message){
-	file << "[" << ofGetLogLevelName(level, true) << "] ";
-	if(module != ""){
-		file << module << ": ";
-	}
-	file << message << endl;
-}
-
-void ofFileLoggerChannel::log(ofLogLevel level, const string & module, const char* format, ...){
-	va_list args;
-	va_start(args, format);
-	log(level, module, format, args);
-	va_end(args);
-}
-
-void ofFileLoggerChannel::log(ofLogLevel level, const string & module, const char* format, va_list args){
-	file << "[" << ofGetLogLevelName(level, true) << "] ";
-	if(module != ""){
-		file << module << ": ";
-	}
-	file << ofVAArgsToString(format,args) << endl;
-}

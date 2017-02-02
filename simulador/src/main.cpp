@@ -173,6 +173,19 @@ int main(int argc, char** argv)
 		if (k->keyIsDown(input::Keyboard::P)) {
 			world->paused(false);
 		}
+
+		if (k->keyIsDown(input::Keyboard::U)) {
+			ofArduino arduino;
+			arduino.connect("COM7");
+			arduino.sendDigitalPinMode(13, ARD_OUTPUT);
+			arduino.sendDigital(13, ARD_HIGH);
+		}
+		if (k->keyIsDown(input::Keyboard::I)) {
+			ofArduino arduino;
+			arduino.connect("COM7");
+			arduino.sendDigitalPinMode(13, ARD_OUTPUT);
+			arduino.sendDigital(13, ARD_LOW);
+		}
 	});
 
     auto enterFrame = canvas->enterFrame()->connect([&](Canvas::Ptr canvas, float time, float deltaTime)

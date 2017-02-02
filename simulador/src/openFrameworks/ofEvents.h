@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ofConstants.h"
-#include "ofPoint.h"
 #include "ofEventUtils.h"
 #include "ofTimer.h"
 #include "ofFpsCounter.h"
@@ -16,13 +15,6 @@ int	ofGetMouseY();
 
 int	ofGetPreviousMouseX();
 int	ofGetPreviousMouseY();
-
-//-----------------------------------------------
-class ofDragInfo{
-	public:
-		vector <string> files;
-		ofPoint position;
-};
 
 
 //-----------------------------------------------
@@ -74,105 +66,6 @@ public:
 	unsigned int codepoint;
 };
 
-class ofMouseEventArgs : public ofEventArgs, public ofVec2f {
-  public:
-	enum Type{
-		Pressed,
-		Moved,
-		Released,
-		Dragged,
-		Scrolled,
-		Entered,
-		Exited
-	};
-
-	ofMouseEventArgs()
-	:type(Pressed)
-	,button(OF_MOUSE_BUTTON_LEFT)
-	,scrollX(0.f)
-	,scrollY(0.f)
-	{}
-
-	ofMouseEventArgs(Type type, float x, float y, int button)
-	:ofVec2f(x,y)
-	,type(type)
-	,button(button)
-	,scrollX(0.f)
-	,scrollY(0.f)
-	{}
-
-	ofMouseEventArgs(Type type, float x, float y)
-	:ofVec2f(x,y)
-	,type(type)
-	,button(0)
-	,scrollX(0.f)
-	,scrollY(0.f)
-	{}
-
-	Type type;
-	int button;
-	float scrollX;
-	float scrollY;
-};
-
-class ofTouchEventArgs : public ofEventArgs, public ofVec2f {
-  public:
-	enum Type{
-		down,
-		up,
-		move,
-		doubleTap,
-		cancel
-	};
-
-	ofTouchEventArgs()
-	:type(down)
-	,id(0)
-	,time(0)
-	,numTouches(0)
-	,width(0)
-	,height(0)
-	,angle(0)
-	,minoraxis(0)
-	,majoraxis(0)
-	,pressure(0)
-	,xspeed(0)
-	,yspeed(0)
-	,xaccel(0)
-	,yaccel(0)
-	{
-
-	}
-
-	ofTouchEventArgs(Type type, float x, float y, int id)
-	:ofVec2f(x,y)
-	,type(type)
-	,id(id)
-	,time(0)
-	,numTouches(0)
-	,width(0)
-	,height(0)
-	,angle(0)
-	,minoraxis(0)
-	,majoraxis(0)
-	,pressure(0)
-	,xspeed(0)
-	,yspeed(0)
-	,xaccel(0)
-	,yaccel(0){}
-
-	Type type;
-	int id;
-	int time;
-	int numTouches;
-	float width, height;
-	float angle;
-	float minoraxis, majoraxis;
-	float pressure;
-	float xspeed, yspeed;
-	float xaccel, yaccel;
-};
-
 class ofResizeEventArgs : public ofEventArgs {
 public:
 	ofResizeEventArgs()
@@ -209,22 +102,7 @@ class ofCoreEvents {
 	ofEvent<ofKeyEventArgs> 	keyPressed;
 	ofEvent<ofKeyEventArgs> 	keyReleased;
 
-	ofEvent<ofMouseEventArgs> 	mouseMoved;
-	ofEvent<ofMouseEventArgs> 	mouseDragged;
-	ofEvent<ofMouseEventArgs> 	mousePressed;
-	ofEvent<ofMouseEventArgs> 	mouseReleased;
-	ofEvent<ofMouseEventArgs> 	mouseScrolled;
-	ofEvent<ofMouseEventArgs> 	mouseEntered;
-	ofEvent<ofMouseEventArgs> 	mouseExited;
-
-	ofEvent<ofTouchEventArgs>	touchDown;
-	ofEvent<ofTouchEventArgs>	touchUp;
-	ofEvent<ofTouchEventArgs>	touchMoved;
-	ofEvent<ofTouchEventArgs>	touchDoubleTap;
-	ofEvent<ofTouchEventArgs>	touchCancelled;
-
 	ofEvent<ofMessage>			messageEvent;
-	ofEvent<ofDragInfo>			fileDragEvent;
 
 	void disable();
 	void enable();
@@ -251,19 +129,8 @@ class ofCoreEvents {
 	void notifyKeyReleased(int key, int keycode=-1, int scancode=-1, int codepoint=-1);
 	void notifyKeyEvent(const ofKeyEventArgs & keyEvent);
 
-	void notifyMousePressed(int x, int y, int button);
-	void notifyMouseReleased(int x, int y, int button);
-	void notifyMouseDragged(int x, int y, int button);
-	void notifyMouseMoved(int x, int y);
-	void notifyMouseScrolled(int x, int y, float scrollX, float scrollY);
-	void notifyMouseEntered(int x, int y);
-	void notifyMouseExited(int x, int y);
-	void notifyMouseEvent(const ofMouseEventArgs & mouseEvent);
-
 	void notifyExit();
 	void notifyWindowResized(int width, int height);
-
-	void notifyDragEvent(ofDragInfo info);
 
 private:
 	float targetRate;

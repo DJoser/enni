@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ofConstants.h"
-#include "ofColor.h"
 
 class ofSerial;
 
@@ -165,20 +164,11 @@ class ofStyle{
 			#else
 				drawBitmapMode		= OF_BITMAPMODE_MODEL_BILLBOARD;
 			#endif
-			bgColor.set(200,200,200);
 			//depthTest = false;
 		}
 
 		/// \brief Destroy the ofStyle.
 		virtual ~ofStyle(){}
-
-		/// \brief The color used when rendering.
-		///
-		/// This style depends on the state of the ofStyle::bFill.
-		ofColor color;
-
-		/// \brief The background color used when rendering.
-		ofColor bgColor;
 
 		/// \brief The current rendering mode for polygons.
 		///

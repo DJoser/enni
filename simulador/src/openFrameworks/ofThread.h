@@ -1,5 +1,6 @@
 #pragma once
 #include "ofConstants.h"
+#define TARGET_NO_THREADS
 #ifndef TARGET_NO_THREADS
 
 #include "Poco/AtomicCounter.h"
