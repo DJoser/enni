@@ -8,6 +8,7 @@
 #include "SDL.h"
 #include "openFrameworks/ofSerial.h"
 #include "openFrameworks/ofArduino.h"
+#include "robot\RobotReal.h"
 #include "robot/RobotVirtual.h"
 
 
@@ -195,10 +196,14 @@ int main(int argc, char** argv)
 				world->paused(false);
 			}
 
+			ModuloCfg ModuloX, ModuloY, ModuloZ;
+			Robot::Ptr RobotReal = Robot::Ptr(new Robot(ModuloX, ModuloY, ModuloZ));
+
 			if (k->keyIsDown(input::Keyboard::U)) {
 				ofArduino arduino;
 				arduino.connect("COM9");
 				arduino.sendDigitalPinMode(4, ARD_OUTPUT);
+				
 				arduino.sendDigital(4, ARD_HIGH);
 			}
 			if (k->keyIsDown(input::Keyboard::I)) {
