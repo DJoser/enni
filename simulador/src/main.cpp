@@ -189,15 +189,15 @@ int main(int argc, char** argv)
 
 		if (k->keyIsDown(input::Keyboard::U)) {
 			ofArduino arduino;
-			arduino.connect("COM7");
-			arduino.sendDigitalPinMode(13, ARD_OUTPUT);
-			arduino.sendDigital(13, ARD_HIGH);
+			arduino.connect("COM9");
+			arduino.sendDigitalPinMode(4, ARD_OUTPUT);
+			arduino.sendDigital(4, ARD_HIGH);
 		}
 		if (k->keyIsDown(input::Keyboard::I)) {
 			ofArduino arduino;
-			arduino.connect("COM7");
-			arduino.sendDigitalPinMode(13, ARD_OUTPUT);
-			arduino.sendDigital(13, ARD_LOW);
+			arduino.connect("COM9");
+			arduino.sendDigitalPinMode(4, ARD_OUTPUT);
+			arduino.sendDigital(4, ARD_LOW);
 		}
 	});
 
