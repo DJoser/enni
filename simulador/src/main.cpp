@@ -8,12 +8,17 @@
 #include "SDL.h"
 #include "openFrameworks/ofSerial.h"
 #include "openFrameworks/ofArduino.h"
+#include "robot/RobotVirtual.h"
+
 
 using namespace minko;
 using namespace minko::component;
 
 int main(int argc, char** argv)
 {
+	RobotVirtual::Ptr Robot = RobotVirtual::Ptr(new RobotVirtual());
+
+
 	bool modoCamara = true;
 	auto overlay = HtmlOverlay::create(argc, argv);
 	auto world = bullet::PhysicsWorld::create();
