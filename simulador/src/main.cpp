@@ -17,7 +17,7 @@ using namespace minko::component;
 
 int main(int argc, char** argv)
 {
-	RobotVirtual::Ptr Robot = RobotVirtual::Ptr(new RobotVirtual());
+	RobotVirtual::Ptr Robott = RobotVirtual::Ptr(new RobotVirtual());
 
 
 	bool modoCamara = true;

@@ -88,13 +88,13 @@ public:
 
 		if (_arduino->isArduinoReady()) {
 			Mx = ModulePtr();
-			Mx->configurar();
+			Mx->configurar(_arduino.get());
 
 			My = ModulePtr();
-			My->configurar();
+			My->configurar(_arduino.get());
 
 			Mz = ModulePtr();
-			Mz->configurar();
+			Mz->configurar(_arduino.get());
 		}
 	}
 
@@ -102,20 +102,23 @@ public:
 		if (!_robotConected)
 			return 0.0;	
 	}
+	int initialPositionX = 0;
+	int initialPositionY = 0;
+	int initialPositionZ = 0;
 
-	void ClearPositionX() {};
+	void ClearPositionX() { initialPositionX = 0; };
 	void MoveInitialX() {};
 	void MoveFinalX() {};
 	double PositionX() { return 0; };
 	void PositionX(double valor) { };
 
-	void ClearPositionY() {};
+	void ClearPositionY() { initialPositionY = 0; };
 	void MoveInitialY() {};
 	void MoveFinalY() {};
 	double PositionY() { return 0; };
 	void PositionY(double valor) { };
 
-	void ClearPositionZ() {};
+	void ClearPositionZ() { initialPositionZ = 0; };
 	void MoveInitialZ() {};
 	void MoveFinalZ() {};
 	double PositionZ() { return 0; };
