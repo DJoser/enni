@@ -14,6 +14,7 @@ using namespace minko::component;
 
 int main(int argc, char** argv)
 {
+	bool modoCamara = true;
 	auto overlay = HtmlOverlay::create(argc, argv);
 	auto world = bullet::PhysicsWorld::create();
 	world->paused(true);
@@ -141,7 +142,7 @@ int main(int argc, char** argv)
         camera = scene::Node::create("camera")
             ->addComponent(PerspectiveCamera::create(canvas->aspectRatio()))
             ->addComponent(Renderer::create(0xdcdcdcff))
-            ->addComponent(Transform::create(math::translate(math::vec3(0.f,2.5f,10.f)) * math::mat4()));
+            ->addComponent(Transform::create(math::translate(math::vec3(0.f,0.5f,2.5f)) * math::mat4()));
         root->addChild(camera);
 
         auto lights = scene::Node::create("lights")
@@ -156,48 +157,51 @@ int main(int argc, char** argv)
     });
 
 	auto keyDown = canvas->keyboard()->keyDown()->connect([&](input::Keyboard::Ptr k) {
-		auto transform = camera->component<Transform>();
+		if (modoCamara)
+		{
+			auto transform = camera->component<Transform>();
 
-		if (k->keyIsDown(input::Keyboard::A)) {
-			transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
-		}
-		if (k->keyIsDown(input::Keyboard::D)) {
-			transform->matrix(translate(math::vec3(.1f, 0.f, 0.f)) * transform->matrix());
-		}
-		if (k->keyIsDown(input::Keyboard::DOWN)) {
-			transform->matrix(translate(math::vec3(0.f, -.1f, 0.f)) * transform->matrix());
-		}
-		if (k->keyIsDown(input::Keyboard::UP)) {
-			transform->matrix(translate(math::vec3(0.f, .1f, 0.f)) * transform->matrix());
-		}
-		if (k->keyIsDown(input::Keyboard::W)) {
-			transform->matrix(translate(math::vec3(0.f, 0.f, -.1f)) * transform->matrix());
-		}
-		if (k->keyIsDown(input::Keyboard::S)) {
-			transform->matrix(translate(math::vec3(0.f, 0.f, .1f)) * transform->matrix());
-		}
+			if (k->keyIsDown(input::Keyboard::A)) {
+				transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
+			}
+			if (k->keyIsDown(input::Keyboard::D)) {
+				transform->matrix(translate(math::vec3(.1f, 0.f, 0.f)) * transform->matrix());
+			}
+			if (k->keyIsDown(input::Keyboard::DOWN)) {
+				transform->matrix(translate(math::vec3(0.f, -.1f, 0.f)) * transform->matrix());
+			}
+			if (k->keyIsDown(input::Keyboard::UP)) {
+				transform->matrix(translate(math::vec3(0.f, .1f, 0.f)) * transform->matrix());
+			}
+			if (k->keyIsDown(input::Keyboard::W)) {
+				transform->matrix(translate(math::vec3(0.f, 0.f, -.1f)) * transform->matrix());
+			}
+			if (k->keyIsDown(input::Keyboard::S)) {
+				transform->matrix(translate(math::vec3(0.f, 0.f, .1f)) * transform->matrix());
+			}
 
-		if (k->keyIsDown(input::Keyboard::ESCAPE)) {
-			canvas->quit();
-		}
-		if (k->keyIsDown(input::Keyboard::F)) {
-			SDL_MaximizeWindow(canvas->window());
-		}
-		if (k->keyIsDown(input::Keyboard::P)) {
-			world->paused(false);
-		}
+			if (k->keyIsDown(input::Keyboard::ESCAPE)) {
+				canvas->quit();
+			}
+			if (k->keyIsDown(input::Keyboard::F)) {
+				SDL_MaximizeWindow(canvas->window());
+			}
+			if (k->keyIsDown(input::Keyboard::P)) {
+				world->paused(false);
+			}
 
-		if (k->keyIsDown(input::Keyboard::U)) {
-			ofArduino arduino;
-			arduino.connect("COM9");
-			arduino.sendDigitalPinMode(4, ARD_OUTPUT);
-			arduino.sendDigital(4, ARD_HIGH);
-		}
-		if (k->keyIsDown(input::Keyboard::I)) {
-			ofArduino arduino;
-			arduino.connect("COM9");
-			arduino.sendDigitalPinMode(4, ARD_OUTPUT);
-			arduino.sendDigital(4, ARD_LOW);
+			if (k->keyIsDown(input::Keyboard::U)) {
+				ofArduino arduino;
+				arduino.connect("COM9");
+				arduino.sendDigitalPinMode(4, ARD_OUTPUT);
+				arduino.sendDigital(4, ARD_HIGH);
+			}
+			if (k->keyIsDown(input::Keyboard::I)) {
+				ofArduino arduino;
+				arduino.connect("COM9");
+				arduino.sendDigitalPinMode(4, ARD_OUTPUT);
+				arduino.sendDigital(4, ARD_LOW);
+			}
 		}
 	});
 
