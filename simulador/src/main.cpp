@@ -197,6 +197,69 @@ int main(int argc, char** argv)
 			}
 
 			ModuloCfg ModuloX, ModuloY, ModuloZ;
+			ModuloX.f_carrea1 = 18;
+			ModuloX.f_carrea2 = 19;
+			ModuloX.motor_negativo = 1;
+			ModuloX.motor_positivo = 0;
+			ModuloX.b0 = 22;
+			ModuloX.b1 = 23;
+			ModuloX.b2 = 24;
+			ModuloX.b3 = 25;
+			ModuloX.b4 = 26;
+			ModuloX.b5 = 27;
+			ModuloX.b6 = 28;
+			ModuloX.b7 = 29;
+			ModuloX.b8 = 30;
+			ModuloX.b9 = 31;
+			ModuloX.b10 = 32;
+			ModuloX.b11 = 33;
+			ModuloX.b12 = 34;
+			ModuloX.b13 = 35;
+			ModuloX.b14 = 36;
+			ModuloX.b15 = 37;
+
+			ModuloY.f_carrea1 = 20;
+			ModuloY.f_carrea2 = 21;
+			ModuloY.motor_negativo = 3;
+			ModuloY.motor_positivo = 2;
+			ModuloY.b0 = 38;
+			ModuloY.b1 = 39;
+			ModuloY.b2 = 40;
+			ModuloY.b3 = 41;
+			ModuloY.b4 = 42;
+			ModuloY.b5 = 43;
+			ModuloY.b6 = 44;
+			ModuloY.b7 = 45;
+			ModuloY.b8 = 46;
+			ModuloY.b9 = 47;
+			ModuloY.b10 = 48;
+			ModuloY.b11 = 49;
+			ModuloY.b12 = 50;
+			ModuloY.b13 = 51;
+			ModuloY.b14 = 52;
+			ModuloY.b15 = 53;
+
+			ModuloZ.f_carrea1 = -1;
+			ModuloZ.f_carrea2 = -1;
+			ModuloZ.motor_negativo = -1;
+			ModuloZ.motor_positivo = -1;
+			ModuloZ.b0 = -1;
+			ModuloZ.b1 = -1;
+			ModuloZ.b2 = -1;
+			ModuloZ.b3 = -1;
+			ModuloZ.b4 = -1;
+			ModuloZ.b5 = -1;
+			ModuloZ.b6 = -1;
+			ModuloZ.b7 = -1;
+			ModuloZ.b8 = -1;
+			ModuloZ.b9 = -1;
+			ModuloZ.b10 = -1;
+			ModuloZ.b11 = -1;
+			ModuloZ.b12 = -1;
+			ModuloZ.b13 = -1;
+			ModuloZ.b14 = -1;
+			ModuloZ.b15 = -1;
+
 			Robot::Ptr RobotReal = Robot::Ptr(new Robot(ModuloX, ModuloY, ModuloZ));
 
 			if (k->keyIsDown(input::Keyboard::U)) {
