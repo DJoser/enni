@@ -229,7 +229,7 @@ int main(int argc, char** argv)
 			ModuloZ.b14 = -1;
 			ModuloZ.b15 = -1;
 
-			Robot::Ptr RobotReal = Robot::Ptr(new Robot(ModuloX, ModuloY, ModuloZ));
+			/*RobotReal::Ptr RobotReal = RobotReal::Ptr(new RobotReal(ModuloX, ModuloY, ModuloZ));*/
 			if (k->keyIsDown(input::Keyboard::L)) {
 				robotVirtual->MoveFinalX();
 			}
