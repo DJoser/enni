@@ -48,19 +48,12 @@ public:
 		// TODO: Agregar propiedades fisicas
 		//		- RigidBody
 		//		- Join
-		/*Base->addComponent(bullet::Collider::create(
+		root->addComponent(bullet::Collider::create(
 			bullet::ColliderData::create(
 				1.f, // static object (no mass)
-				bullet::CylinderShape::create(1.f, 1.f, 1.f)
+				bullet::BoxShape::create(.2f, .4f, .2f)
 			)
-		))->addComponent(bullet::ColliderDebug::create(assets));;
-
-		Cabeza->addComponent(bullet::Collider::create(
-			bullet::ColliderData::create(
-				1.f, // static object (no mass)
-				bullet::ConvexHullShape::create(Cabeza->component<geometry::Geometry>())
-			)
-		));*/
+		))->addComponent(bullet::ColliderDebug::create(assets));
 	}
 	~RobotVirtual() {}
 
