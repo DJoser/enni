@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 {
 	// Interfaz grafica HTML
 	auto overlay = HtmlOverlay::create(argc, argv);
-	
+
 	// Simulador Fisica (Bullet)
 	auto world = bullet::PhysicsWorld::create();
 	world->paused(true);
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 		->registerParser<file::BlenderParser>("blend")
 		->registerParser<file::PNGParser>("png")
 		->registerParser<file::JPEGParser>("jpg");
-	
+
 	auto fxLoader = file::Loader::create(defaultLoader)
 		->queue("effect/Line.effect")
 		->queue("effect/Phong.effect")
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
 				geometry::CubeGeometry::create(assets->context()),
 				material::Material::create()->set({
 					{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
-				}),
+		}),
 				assets->effect("effect/Phong.effect")
 			))
 			->addComponent(bullet::Collider::create(
@@ -130,8 +130,8 @@ int main(int argc, char** argv)
 	auto keyDown = canvas->keyboard()->keyDown()->connect([&](input::Keyboard::Ptr k) {
 		if (modoCamara)
 		{
+			// Control Camara
 			auto transform = camera->component<Transform>();
-
 			if (k->keyIsDown(input::Keyboard::A)) {
 				transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
 			}
@@ -150,7 +150,6 @@ int main(int argc, char** argv)
 			if (k->keyIsDown(input::Keyboard::S)) {
 				transform->matrix(translate(math::vec3(0.f, 0.f, .1f)) * transform->matrix());
 			}
-
 			if (k->keyIsDown(input::Keyboard::ESCAPE)) {
 				canvas->quit();
 			}
@@ -161,18 +160,36 @@ int main(int argc, char** argv)
 				world->paused(false);
 			}
 
+
+			// Control del robot
+			if (k->keyIsDown(input::Keyboard::O)) {
+				robotVirtual->MoveInitialX();
+			}
 			if (k->keyIsDown(input::Keyboard::L)) {
-				robotVirtual->ClearPositionX();
+				robotVirtual->MoveFinalX();
+			}
+			if (k->keyIsDown(input::Keyboard::I)) {
+				robotVirtual->MoveInitialY();
+			}
+			if (k->keyIsDown(input::Keyboard::K)) {
+				robotVirtual->MoveFinalY();
+			}
+			if (k->keyIsDown(input::Keyboard::U)) {
+				robotVirtual->MoveInitialZ();
+			}
+			if (k->keyIsDown(input::Keyboard::J)) {
+				robotVirtual->MoveFinalZ();
 			}
 
-			if (k->keyIsDown(input::Keyboard::U)) {
+			// Prueba Arduino
+			if (k->keyIsDown(input::Keyboard::Y)) {
 				ofArduino arduino;
 				arduino.connect("COM9");
 				arduino.sendDigitalPinMode(4, ARD_OUTPUT);
 
 				arduino.sendDigital(4, ARD_HIGH);
 			}
-			if (k->keyIsDown(input::Keyboard::I)) {
+			if (k->keyIsDown(input::Keyboard::H)) {
 				ofArduino arduino;
 				arduino.connect("COM9");
 				arduino.sendDigitalPinMode(4, ARD_OUTPUT);
