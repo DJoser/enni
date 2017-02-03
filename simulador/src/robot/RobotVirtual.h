@@ -20,7 +20,15 @@ private:
 	scene::Node::Ptr Piso = nullptr;
 	scene::Node::Ptr Rotor = nullptr;
 
-	int posicion = 0;
+	// Posiciones Inciales
+	math::mat4 _Mix;
+	math::mat4 _Miy;
+	math::mat4 _Miz;
+
+	// Transformaciones actuales
+	Transform::Ptr transformX = nullptr;
+	Transform::Ptr transformY = nullptr;
+	Transform::Ptr transformZ = nullptr;
 
 public:
 	typedef std::shared_ptr<RobotVirtual> Ptr;
@@ -45,15 +53,26 @@ public:
 		// Agregar el robot a la simulacion
 		root->addChild(Rob);
 
+		// Extraer Transformaciones
+		transformX = Extensor->component<Transform>();
+		transformY = Cabeza->component<Transform>();
+		transformZ = Rotor->component<Transform>();
+
+		// Extraer Matrices iniciales
+		_Mix = transformX->matrix();
+		_Miy = transformY->matrix();
+		_Miz = transformZ->matrix();
+
+
 		// TODO: Agregar propiedades fisicas
 		//		- RigidBody
 		//		- Join
-		root->addComponent(bullet::Collider::create(
+		/*root->addComponent(bullet::Collider::create(
 			bullet::ColliderData::create(
 				1.f, // static object (no mass)
 				bullet::BoxShape::create(.2f, .4f, .2f)
 			)
-		))->addComponent(bullet::ColliderDebug::create(assets));
+		))->addComponent(bullet::ColliderDebug::create(assets));*/
 	}
 	~RobotVirtual() {}
 
@@ -75,17 +94,14 @@ public:
 		transform->matrix(Xf);
 	};
 	void MoveFinalX() {
-		// Extraer
-		auto transform = Extensor->component<Transform>();
-
 		// Calcular
 		auto dx = -.01;
-		auto X = transform->matrix();
+		auto X = transformX->matrix();
 		auto Xt = translate(math::vec3(dx, 0.f, 0.f));
 		auto Xf = Xt * X;
 
 		// Aplicar
-		transform->matrix(Xf);
+		transformX->matrix(Xf);
 	};
 	double PositionX() { 
 		return 0; 
@@ -95,10 +111,6 @@ public:
 
 	void ClearPositionY() {};
 	void MoveInitialY() {
-		// Extraer
-		auto transformX = Extensor->component<Transform>();
-		auto transformY = Cabeza->component<Transform>();
-
 		// Calcular
 		auto dy = .01;
 
@@ -115,10 +127,6 @@ public:
 		transformY->matrix(Yf);
 	};
 	void MoveFinalY() {
-		// Extraer
-		auto transformX = Extensor->component<Transform>();
-		auto transformY = Cabeza->component<Transform>();
-
 		// Calcular
 		auto dy = -.01;
 
@@ -139,11 +147,6 @@ public:
 
 	void ClearPositionZ() {};
 	void MoveInitialZ() {
-		// Extraer
-		auto transformX = Extensor->component<Transform>();
-		auto transformY = Cabeza->component<Transform>();
-		auto transformZ = Rotor->component<Transform>();
-
 		// Calcular
 		auto dz = .01;
 
@@ -163,11 +166,6 @@ public:
 		transformZ->matrix(Zf);
 	};
 	void MoveFinalZ() {
-		// Extraer
-		auto transformX = Extensor->component<Transform>();
-		auto transformY = Cabeza->component<Transform>();
-		auto transformZ = Rotor->component<Transform>();
-
 		// Calcular
 		auto dz = -.01;
 
@@ -175,7 +173,7 @@ public:
 		auto Yi = transformY->matrix();
 		auto Zi = transformZ->matrix();
 
-		auto R = glm::rotate<float, glm::precision::highp>(dz, math::vec3(0.f, 0.f, 1.f));
+		auto R = glm::rotate<float, glm::precision::highp>(dz, math::vec3(0.5f, 0.f, 1.f));
 
 		auto Xf = R * Xi;
 		auto Yf = R * Yi;
