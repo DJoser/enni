@@ -164,7 +164,7 @@ int main(int argc, char** argv)
 
 		// Conectar robot Real
 		ModuloCfg ModuloX, ModuloY, ModuloZ;
-		RobotReal::Ptr robotReal = RobotReal::Ptr(new RobotReal(PUERTO_ANDROID,ModuloX, ModuloY, ModuloZ));
+		RobotReal::Ptr robotReal = RobotReal::Ptr(new RobotReal(PUERTO_ARDUINO,ModuloX, ModuloY, ModuloZ));
 
 		// Establecer el robot actual
 		robotActual = robotVirtual;
