@@ -137,7 +137,7 @@ int main(int argc, char** argv)
 			return;
 
 		auto tituloPagina = dom->getElementById("logo-container");
-		tituloPagina->textContent("Hola mundo");
+		//tituloPagina->textContent("Hola mundo");
 
 		auto contenido = dom->getElementById("logo-container")->textContent();
 	});
