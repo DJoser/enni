@@ -26,12 +26,9 @@ typedef struct ModuloCfg {
 	int b14 = -1;
 	int b15 = -1;
 };
-class Robot : public IRobotController
+class RobotReal : public IRobotController
 {
 private:
-	bool _robotConected = true;
-	std::shared_ptr<ofArduino> _arduino = nullptr;
-
 	class Module {
 	private:
 		int _minPosition = 0;
@@ -39,6 +36,7 @@ private:
 		int _currentPosition = 0;
 		ModuloCfg _configuracion;
 	public:
+		typedef std::shared_ptr<Module> Ptr;
 		Module(ModuloCfg cfg) {
 			_configuracion = cfg;
 		}
@@ -115,49 +113,43 @@ private:
 			return valor;
 		}
 	};
-	typedef std::shared_ptr<Module> ModulePtr;
+	
+	bool _robotConected = true;
+	std::shared_ptr<ofArduino> _arduino = nullptr;
 
-	ModulePtr Mx = nullptr;
-	ModulePtr My = nullptr;
-	ModulePtr Mz = nullptr;
+	Module::Ptr Mx = nullptr;
+	Module::Ptr My = nullptr;
+	Module::Ptr Mz = nullptr;
 
+	int _positionX = 0;
+	int _positionY = 0;
+	int _positionZ = 0;
 
 public:
-	typedef std::shared_ptr<Robot> Ptr;
-	Robot(ModuloCfg Modx, ModuloCfg Mody, ModuloCfg Modz) {
-		Mx = ModulePtr(new Module(Modx));
-		My = ModulePtr(new Module(Mody));
-		Mz = ModulePtr(new Module(Modz));
+	typedef std::shared_ptr<RobotReal> Ptr;
+	
+	RobotReal(ModuloCfg Modx, ModuloCfg Mody, ModuloCfg Modz) {
+		Mx = Module::Ptr(new Module(Modx));
+		My = Module::Ptr(new Module(Mody));
+		Mz = Module::Ptr(new Module(Modz));
 	}
-	~Robot()
+	
+	~RobotReal()
 	{
 
 	}
 
 	bool conectar(std::string Puerto, int baudRate = 57600) {
-		_arduino->connect("COM9",baudRate);
+		_arduino->connect(Puerto,baudRate);
 
 		if (_arduino->isArduinoReady()) {
-			Mx = ModulePtr();
 			Mx->configurar(_arduino.get());
-
-			My = ModulePtr();
 			My->configurar(_arduino.get());
-
-			Mz = ModulePtr();
 			Mz->configurar(_arduino.get());
 		}
 	}
 
-	double getPosition() {
-		if (!_robotConected)
-			return 0.0;	
-	}
-	int PositionX = 0;
-	int PositionY = 0;
-	int PositionZ = 0;
-
-	void ClearPositionX() { PositionX = 0; };
+	void ClearPositionX() { _positionX = 0; };
 	void MoveInitialX() {
 		if (!Mx->LeerInicio(_arduino.get())) {
 			Mx->EncenderMotor2(_arduino.get());
@@ -200,7 +192,7 @@ public:
 		}
 	};
 
-	void ClearPositionY() { PositionY = 0; };
+	void ClearPositionY() { _positionY = 0; };
 	void MoveInitialY() {
 		if (!My->LeerInicio(_arduino.get())) {
 			My->EncenderMotor2(_arduino.get());
@@ -243,7 +235,7 @@ public:
 		}
 	};
 
-	void ClearPositionZ() { PositionZ = 0; };
+	void ClearPositionZ() { _positionZ = 0; };
 	void MoveInitialZ() {
 		if (!Mz->LeerInicio(_arduino.get())) {
 			Mz->EncenderMotor2(_arduino.get());

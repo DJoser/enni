@@ -48,13 +48,15 @@ int main(int argc, char** argv)
 
 	// Variables de control
 	bool modoCamara = true;
+	RobotVirtual::Ptr robotVirtual = nullptr;
+	RobotReal::Ptr robotReal = nullptr;
+
 
 	// Nodos
 	auto root = scene::Node::create("root")
 		->addComponent(sceneManager)
 		->addComponent(world)
 		->addComponent(overlay);
-	RobotVirtual::Ptr Robott = nullptr;
 	scene::Node::Ptr plano = nullptr;
 	scene::Node::Ptr camera = nullptr;
 
@@ -76,8 +78,12 @@ int main(int argc, char** argv)
 		// Cargar default shader
 		defaultLoader->options()->effect(assets->effect("effect/Phong.effect"));
 
-		// Cargar el robot
-		Robott = RobotVirtual::Ptr(new RobotVirtual(root));
+		// Cargar el robot Virtual
+		robotVirtual = RobotVirtual::Ptr(new RobotVirtual(root));
+
+		// Conectar robot Real
+		ModuloCfg ModuloX, ModuloY, ModuloZ;
+		RobotReal::Ptr robotReal = RobotReal::Ptr(new RobotReal(ModuloX, ModuloY, ModuloZ));
 
 		// Crear el plano de simulacion
 		float GROUND_WIDTH = 5.f;
@@ -156,11 +162,8 @@ int main(int argc, char** argv)
 			}
 
 			if (k->keyIsDown(input::Keyboard::L)) {
-				Robott->ClearPositionX();
+				robotVirtual->ClearPositionX();
 			}
-
-			ModuloCfg ModuloX, ModuloY, ModuloZ;
-			Robot::Ptr RobotReal = Robot::Ptr(new Robot(ModuloX, ModuloY, ModuloZ));
 
 			if (k->keyIsDown(input::Keyboard::U)) {
 				ofArduino arduino;
