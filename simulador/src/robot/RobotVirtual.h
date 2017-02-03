@@ -66,33 +66,74 @@ public:
 		auto transform = Extensor->component<Transform>();
 
 		// Calcular
-		auto dx = 10;
-		auto A = transform->matrix();
-		auto Tx = translate(math::vec3(dx, 0.f, 0.f));
-		auto ATx = Tx * A;
+		auto dx = .01;
+		auto X = transform->matrix();
+		auto Xt = translate(math::vec3(dx, 0.f, 0.f));
+		auto Xf = Xt * X;
 
 		// Aplicar
-		transform->matrix(ATx);
+		transform->matrix(Xf);
 	};
 	void MoveFinalX() {
 		// Extraer
 		auto transform = Extensor->component<Transform>();
 
 		// Calcular
-		auto dx = -10;
-		auto A = transform->matrix();
-		auto Tx = translate(math::vec3(dx, 0.f, 0.f));
-		auto ATx = Tx * A;
+		auto dx = -.01;
+		auto X = transform->matrix();
+		auto Xt = translate(math::vec3(dx, 0.f, 0.f));
+		auto Xf = Xt * X;
 
 		// Aplicar
-		transform->matrix(ATx);
+		transform->matrix(Xf);
 	};
-	double PositionX() { return 0; };
-	void PositionX(double valor) { };
+	double PositionX() { 
+		return 0; 
+	};
+	void PositionX(double valor) { 
+	};
 
 	void ClearPositionY() {};
-	void MoveInitialY() {};
-	void MoveFinalY() {};
+	void MoveInitialY() {
+		// Extraer
+		auto transformX = Extensor->component<Transform>();
+		auto transformY = Cabeza->component<Transform>();
+
+		// Calcular
+		auto dy = .01;
+
+		auto Xi = transformX->matrix();
+		auto Yi = transformY->matrix();
+
+		auto T = translate(math::vec3(0.f,  0.f, dy));
+
+		auto Xf = T * Xi;
+		auto Yf = T * Yi;
+
+		// Aplicar
+		transformX->matrix(Xf);
+		transformY->matrix(Yf);
+	};
+	void MoveFinalY() {
+		// Extraer
+		auto transformX = Extensor->component<Transform>();
+		auto transformY = Cabeza->component<Transform>();
+
+		// Calcular
+		auto dy = -.01;
+
+		auto Xi = transformX->matrix();
+		auto Yi = transformY->matrix();
+
+		auto T = translate(math::vec3(0.f, 0.f, dy));
+
+		auto Xf = T * Xi;
+		auto Yf = T * Yi;
+
+		// Aplicar
+		transformX->matrix(Xf);
+		transformY->matrix(Yf);
+	};
 	double PositionY() { return 0; };
 	void PositionY(double valor) { };
 

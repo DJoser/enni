@@ -130,8 +130,8 @@ int main(int argc, char** argv)
 	auto keyDown = canvas->keyboard()->keyDown()->connect([&](input::Keyboard::Ptr k) {
 		if (modoCamara)
 		{
+			// Control Camara
 			auto transform = camera->component<Transform>();
-
 			if (k->keyIsDown(input::Keyboard::A)) {
 				transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
 			}
@@ -150,7 +150,6 @@ int main(int argc, char** argv)
 			if (k->keyIsDown(input::Keyboard::S)) {
 				transform->matrix(translate(math::vec3(0.f, 0.f, .1f)) * transform->matrix());
 			}
-
 			if (k->keyIsDown(input::Keyboard::ESCAPE)) {
 				canvas->quit();
 			}
@@ -161,21 +160,31 @@ int main(int argc, char** argv)
 				world->paused(false);
 			}
 
+
+			// Control del robot
 			if (k->keyIsDown(input::Keyboard::L)) {
 				robotVirtual->MoveInitialX();
 			}
 			if (k->keyIsDown(input::Keyboard::O)) {
 				robotVirtual->MoveFinalX();
 			}
+			if (k->keyIsDown(input::Keyboard::I)) {
+				robotVirtual->MoveInitialY();
+			}
+			if (k->keyIsDown(input::Keyboard::K)) {
+				robotVirtual->MoveFinalY();
+			}
 
-			if (k->keyIsDown(input::Keyboard::U)) {
+
+			// Prueba Arduino
+			if (k->keyIsDown(input::Keyboard::Y)) {
 				ofArduino arduino;
 				arduino.connect("COM9");
 				arduino.sendDigitalPinMode(4, ARD_OUTPUT);
 
 				arduino.sendDigital(4, ARD_HIGH);
 			}
-			if (k->keyIsDown(input::Keyboard::I)) {
+			if (k->keyIsDown(input::Keyboard::H)) {
 				ofArduino arduino;
 				arduino.connect("COM9");
 				arduino.sendDigitalPinMode(4, ARD_OUTPUT);
