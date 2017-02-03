@@ -8,7 +8,7 @@
 #include "SDL.h"
 #include "openFrameworks/ofSerial.h"
 #include "openFrameworks/ofArduino.h"
-#include "robot\RobotReal.h"
+#include "robot/RobotReal.h"
 #include "robot/RobotVirtual.h"
 
 
@@ -17,47 +17,47 @@ using namespace minko::component;
 
 int main(int argc, char** argv)
 {
-	RobotVirtual::Ptr Robott = RobotVirtual::Ptr(new RobotVirtual());
-
-
-	bool modoCamara = true;
+	// Interfaz grafica HTML
 	auto overlay = HtmlOverlay::create(argc, argv);
+	
+	// Simulador Fisica (Bullet)
 	auto world = bullet::PhysicsWorld::create();
 	world->paused(true);
 
-    auto canvas = Canvas::create("E.N.N.I.", 960, 540,Canvas::Flags::CHROMELESS);
-    auto sceneManager = SceneManager::create(canvas);
-    auto assets = sceneManager->assets();
-    auto defaultLoader = sceneManager->assets()->loader();
-
+	// Canvas de dibujo
+	auto canvas = Canvas::create("E.N.N.I.", 960, 540, Canvas::Flags::CHROMELESS);
+	auto sceneManager = SceneManager::create(canvas);
+	auto assets = sceneManager->assets();
+	auto defaultLoader = sceneManager->assets()->loader();
 	auto defaultOptions = defaultLoader->options();
 
-	// setup assets
+	// Cargar Assets
 	defaultOptions
 		->generateMipmaps(true)
-		->skinningFramerate(60)
-		->skinningMethod(SkinningMethod::HARDWARE)
-		->startAnimation(true)
 		->registerParser<file::OBJParser>("obj")
 		->registerParser<file::ColladaParser>("dae")
 		->registerParser<file::BlenderParser>("blend")
 		->registerParser<file::PNGParser>("png")
 		->registerParser<file::JPEGParser>("jpg");
 	
-    auto root = scene::Node::create("root")
-        ->addComponent(sceneManager)
-		->addComponent(world)
-		->addComponent(overlay);
-
 	auto fxLoader = file::Loader::create(defaultLoader)
 		->queue("effect/Line.effect")
 		->queue("effect/Phong.effect")
 		->queue("effect/Basic.effect")
 		->queue("robot/tyson.dae");
 
-    scene::Node::Ptr plano = nullptr;
-	scene::Node::Ptr cubo = nullptr;
-	scene::Node::Ptr cubo2 = nullptr;
+	// Variables de control
+	bool modoCamara = true;
+	RobotVirtual::Ptr robotVirtual = nullptr;
+	RobotReal::Ptr robotReal = nullptr;
+
+
+	// Nodos
+	auto root = scene::Node::create("root")
+		->addComponent(sceneManager)
+		->addComponent(world)
+		->addComponent(overlay);
+	scene::Node::Ptr plano = nullptr;
 	scene::Node::Ptr camera = nullptr;
 
 	auto onloadSlot = overlay->onload()->connect([=](minko::dom::AbstractDOM::Ptr dom, std::string page)
@@ -69,28 +69,34 @@ int main(int argc, char** argv)
 
 		auto tituloPagina = dom->getElementById("logo-container");
 		tituloPagina->textContent("Hola mundo");
-		
+
 		auto contenido = dom->getElementById("logo-container")->textContent();
 	});
 
-	overlay->load("html/interface.html");
 	auto fxComplete = fxLoader->complete()->connect([&](file::Loader::Ptr loader)
 	{
-		defaultLoader->options()
-			->effect(assets->effect("effect/Phong.effect"));
+		// Cargar default shader
+		defaultLoader->options()->effect(assets->effect("effect/Phong.effect"));
 
+		// Cargar el robot Virtual
+		robotVirtual = RobotVirtual::Ptr(new RobotVirtual(root));
+
+		// Conectar robot Real
+		ModuloCfg ModuloX, ModuloY, ModuloZ;
+		RobotReal::Ptr robotReal = RobotReal::Ptr(new RobotReal(ModuloX, ModuloY, ModuloZ));
+
+		// Crear el plano de simulacion
 		float GROUND_WIDTH = 5.f;
 		float GROUND_DEPTH = 5.f;
 		float GROUND_THICK = 0.1f;
 		auto planoMatrix = math::scale(math::vec3(GROUND_WIDTH, GROUND_THICK, GROUND_DEPTH)) * math::mat4();
-
 		plano = scene::Node::create("plano")
 			->addComponent(Transform::create(planoMatrix))
 			->addComponent(Surface::create(
 				geometry::CubeGeometry::create(assets->context()),
 				material::Material::create()->set({
 					{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
-		}),
+				}),
 				assets->effect("effect/Phong.effect")
 			))
 			->addComponent(bullet::Collider::create(
@@ -102,65 +108,24 @@ int main(int argc, char** argv)
 			->addComponent(bullet::ColliderDebug::create(assets));
 		root->addChild(plano);
 
-		cubo = scene::Node::create("cubo")
-			->addComponent(Transform::create(math::translate(math::vec3(0.f, 1.f, 0.f)) * math::mat4()))
-			->addComponent(Surface::create(
-				geometry::CubeGeometry::create(assets->context()),
-				material::Material::create()->set({
-					{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
-				}),
-				assets->effect("effect/Phong.effect")
-			));
+		// Agregar Luces
+		camera = scene::Node::create("camera")
+			->addComponent(PerspectiveCamera::create(canvas->aspectRatio()))
+			->addComponent(Renderer::create(0xdcdcdcff))
+			->addComponent(Transform::create(math::translate(math::vec3(0.f, 0.5f, 2.5f)) * math::mat4()));
+		root->addChild(camera);
 
-		cubo->addComponent(bullet::Collider::create(
-			bullet::ColliderData::create(
-				1.f,
-				bullet::BoxShape::create(0.5f, 0.5f, 0.5f)
-			)
-		));
-		cubo->addComponent(bullet::ColliderDebug::create(assets));
-		//root->addChild(cubo);
-
-		cubo2 = scene::Node::create("cubo2")
-			->addComponent(Transform::create(math::translate(math::vec3(0.f, 3.f, 0.f)) * math::mat4()))
-			->addComponent(Surface::create(
-				geometry::CubeGeometry::create(assets->context()),
-				material::Material::create()->set({
-					{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
-				}),
-				assets->effect("effect/Phong.effect")
-			))->addComponent(bullet::Collider::create(
-				bullet::ColliderData::create(
-					1.f,
-					bullet::BoxShape::create(0.5f, 0.5f, 0.5f)
-				)
-			))
-			->addComponent(bullet::ColliderDebug::create(assets));
-		//cubo->addChild(cubo2);
-
-		//world->addConstraint(cubo->component<bullet::Collider>(), cubo2->component<bullet::Collider>());
-
-		auto model = sceneManager->assets()->symbol("robot/tyson.dae");
-		root->addChild(model);
-
-
-
-        camera = scene::Node::create("camera")
-            ->addComponent(PerspectiveCamera::create(canvas->aspectRatio()))
-            ->addComponent(Renderer::create(0xdcdcdcff))
-            ->addComponent(Transform::create(math::translate(math::vec3(0.f,0.5f,2.5f)) * math::mat4()));
-        root->addChild(camera);
-
-        auto lights = scene::Node::create("lights")
-            ->addComponent(DirectionalLight::create())
-            ->addComponent(AmbientLight::create())
-            ->addComponent(Transform::create(math::inverse(math::lookAt(
-                math::vec3(0.f, 2.f, 5.f),
-                math::vec3(0.f, 0.f, 0.f),
-                math::vec3(0.f, 1.f, 0.f)
-            ))));
-        root->addChild(lights);
-    });
+		// Agregar Camara
+		auto lights = scene::Node::create("lights")
+			->addComponent(DirectionalLight::create())
+			->addComponent(AmbientLight::create())
+			->addComponent(Transform::create(math::inverse(math::lookAt(
+				math::vec3(0.f, 2.f, 5.f),
+				math::vec3(0.f, 0.f, 0.f),
+				math::vec3(0.f, 1.f, 0.f)
+			))));
+		root->addChild(lights);
+	});
 
 	auto keyDown = canvas->keyboard()->keyDown()->connect([&](input::Keyboard::Ptr k) {
 		if (modoCamara)
@@ -261,12 +226,15 @@ int main(int argc, char** argv)
 			ModuloZ.b15 = -1;
 
 			Robot::Ptr RobotReal = Robot::Ptr(new Robot(ModuloX, ModuloY, ModuloZ));
+			if (k->keyIsDown(input::Keyboard::L)) {
+				robotVirtual->ClearPositionX();
+			}
 
 			if (k->keyIsDown(input::Keyboard::U)) {
 				ofArduino arduino;
 				arduino.connect("COM9");
 				arduino.sendDigitalPinMode(4, ARD_OUTPUT);
-				
+
 				arduino.sendDigital(4, ARD_HIGH);
 			}
 			if (k->keyIsDown(input::Keyboard::I)) {
@@ -278,13 +246,14 @@ int main(int argc, char** argv)
 		}
 	});
 
-    auto enterFrame = canvas->enterFrame()->connect([&](Canvas::Ptr canvas, float time, float deltaTime)
+	auto enterFrame = canvas->enterFrame()->connect([&](Canvas::Ptr canvas, float time, float deltaTime)
 	{
-        sceneManager->nextFrame(time, deltaTime);
-    });
+		sceneManager->nextFrame(time, deltaTime);
+	});
 
-    fxLoader->load();
-    canvas->run();
+	overlay->load("html/interface.html");
+	fxLoader->load();
+	canvas->run();
 
-    return 0;
+	return 0;
 }
