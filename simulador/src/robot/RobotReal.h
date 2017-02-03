@@ -128,10 +128,12 @@ private:
 public:
 	typedef std::shared_ptr<RobotReal> Ptr;
 	
-	RobotReal(ModuloCfg Modx, ModuloCfg Mody, ModuloCfg Modz) {
+	RobotReal(std::string COM ,ModuloCfg Modx, ModuloCfg Mody, ModuloCfg Modz) {
 		Mx = Module::Ptr(new Module(Modx));
 		My = Module::Ptr(new Module(Mody));
 		Mz = Module::Ptr(new Module(Modz));
+		
+		_arduino->connect(COM);
 	}
 	
 	~RobotReal()

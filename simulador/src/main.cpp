@@ -15,6 +15,9 @@
 using namespace minko;
 using namespace minko::component;
 
+
+
+
 RobotReal::Ptr configurarRobotReal() {
 	ModuloCfg ModuloX, ModuloY, ModuloZ;
 	ModuloX.f_carrea1 = 18;
@@ -84,8 +87,15 @@ RobotReal::Ptr configurarRobotReal() {
 	return r;
 }
 
+// Interfaz Grafica
+dom::AbstractDOMElement::Ptr tituloPagina;
+
 int main(int argc, char** argv)
 {
+	// Constantes
+	CONST std::string TITULO_VENTANA = "E.N.N.I.";
+	CONST std::string PUERTO_ARDUINO = "COM9";
+
 	// Interfaz grafica HTML
 	auto overlay = HtmlOverlay::create(argc, argv);
 
@@ -94,7 +104,7 @@ int main(int argc, char** argv)
 	world->paused(true);
 
 	// Canvas de dibujo
-	auto canvas = Canvas::create("E.N.N.I.", 960, 540, Canvas::Flags::CHROMELESS);
+	auto canvas = Canvas::create(TITULO_VENTANA, 960, 540, Canvas::Flags::CHROMELESS);
 	auto sceneManager = SceneManager::create(canvas);
 	auto assets = sceneManager->assets();
 	auto defaultLoader = sceneManager->assets()->loader();
@@ -117,9 +127,12 @@ int main(int argc, char** argv)
 
 	// Variables de control
 	bool modoCamara = true;
+	IRobotController::Ptr robotActual = nullptr;
 	RobotVirtual::Ptr robotVirtual = nullptr;
 	RobotReal::Ptr robotReal = configurarRobotReal();
-
+	
+	// Lista de robots
+	std::vector<IRobotController> robots;
 
 	// Nodos
 	auto root = scene::Node::create("root")
@@ -136,8 +149,7 @@ int main(int argc, char** argv)
 		if (!dom->isMain())
 			return;
 
-		auto tituloPagina = dom->getElementById("logo-container");
-		//tituloPagina->textContent("Hola mundo");
+		tituloPagina = dom::AbstractDOMElement::Ptr(dom->getElementById("logo-container").get());
 
 		auto contenido = dom->getElementById("logo-container")->textContent();
 	});
@@ -152,7 +164,10 @@ int main(int argc, char** argv)
 
 		// Conectar robot Real
 		ModuloCfg ModuloX, ModuloY, ModuloZ;
-		RobotReal::Ptr robotReal = RobotReal::Ptr(new RobotReal(ModuloX, ModuloY, ModuloZ));
+		RobotReal::Ptr robotReal = RobotReal::Ptr(new RobotReal(PUERTO_ANDROID,ModuloX, ModuloY, ModuloZ));
+
+		// Establecer el robot actual
+		robotActual = robotVirtual;
 
 		// Crear el plano de simulacion
 		float GROUND_WIDTH = 5.f;
@@ -225,30 +240,41 @@ int main(int argc, char** argv)
 			if (k->keyIsDown(input::Keyboard::F)) {
 				SDL_MaximizeWindow(canvas->window());
 			}
-			if (k->keyIsDown(input::Keyboard::P)) {
+			if (k->keyIsDown(input::Keyboard::M)) {
 				world->paused(false);
 			}
 
 
 			// Control del robot
 			if (k->keyIsDown(input::Keyboard::O)) {
-				robotVirtual->MoveInitialX();
+				robotActual->MoveInitialX();
 			}
 			if (k->keyIsDown(input::Keyboard::L)) {
-				robotVirtual->MoveFinalX();
+				robotActual->MoveFinalX();
 			}
 			if (k->keyIsDown(input::Keyboard::I)) {
-				robotVirtual->MoveInitialY();
+				robotActual->MoveInitialY();
 			}
 			if (k->keyIsDown(input::Keyboard::K)) {
-				robotVirtual->MoveFinalY();
+				robotActual->MoveFinalY();
 			}
 			if (k->keyIsDown(input::Keyboard::U)) {
-				robotVirtual->MoveInitialZ();
+				robotActual->MoveInitialZ();
 			}
 			if (k->keyIsDown(input::Keyboard::J)) {
-				robotVirtual->MoveFinalZ();
+				robotActual->MoveFinalZ();
 			}
+
+			// Cambio de robot
+			if(k->keyIsDown(input::Keyboard::M)) {
+				tituloPagina->textContent(TITULO_VENTANA + " : Real");
+				robotActual = robotReal;
+			}
+			if (k->keyIsDown(input::Keyboard::N)) {
+				tituloPagina->textContent(TITULO_VENTANA + " : Virtual");
+				robotActual = robotVirtual;
+			}
+
 
 			// Prueba Arduino
 			if (k->keyIsDown(input::Keyboard::Y)) {
