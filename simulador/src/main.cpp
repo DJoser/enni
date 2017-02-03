@@ -15,7 +15,9 @@
 using namespace minko;
 using namespace minko::component;
 
-
+// Constantes
+CONST std::string TITULO_VENTANA = "E.N.N.I.";
+CONST std::string PUERTO_ARDUINO = "COM9";
 
 
 RobotReal::Ptr configurarRobotReal() {
@@ -83,7 +85,7 @@ RobotReal::Ptr configurarRobotReal() {
 	ModuloZ.b14 = -1;
 	ModuloZ.b15 = -1;
 
-	RobotReal::Ptr r = RobotReal::Ptr(new RobotReal(ModuloX, ModuloY, ModuloZ));
+	RobotReal::Ptr r = RobotReal::Ptr(new RobotReal(PUERTO_ARDUINO, ModuloX, ModuloY, ModuloZ));
 	return r;
 }
 
@@ -92,10 +94,6 @@ dom::AbstractDOMElement::Ptr tituloPagina;
 
 int main(int argc, char** argv)
 {
-	// Constantes
-	CONST std::string TITULO_VENTANA = "E.N.N.I.";
-	CONST std::string PUERTO_ARDUINO = "COM9";
-
 	// Interfaz grafica HTML
 	auto overlay = HtmlOverlay::create(argc, argv);
 
