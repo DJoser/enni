@@ -162,10 +162,10 @@ int main(int argc, char** argv)
 
 
 			// Control del robot
-			if (k->keyIsDown(input::Keyboard::L)) {
+			if (k->keyIsDown(input::Keyboard::O)) {
 				robotVirtual->MoveInitialX();
 			}
-			if (k->keyIsDown(input::Keyboard::O)) {
+			if (k->keyIsDown(input::Keyboard::L)) {
 				robotVirtual->MoveFinalX();
 			}
 			if (k->keyIsDown(input::Keyboard::I)) {
@@ -174,7 +174,12 @@ int main(int argc, char** argv)
 			if (k->keyIsDown(input::Keyboard::K)) {
 				robotVirtual->MoveFinalY();
 			}
-
+			if (k->keyIsDown(input::Keyboard::U)) {
+				robotVirtual->MoveInitialZ();
+			}
+			if (k->keyIsDown(input::Keyboard::J)) {
+				robotVirtual->MoveFinalZ();
+			}
 
 			// Prueba Arduino
 			if (k->keyIsDown(input::Keyboard::Y)) {

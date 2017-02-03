@@ -138,8 +138,54 @@ public:
 	void PositionY(double valor) { };
 
 	void ClearPositionZ() {};
-	void MoveInitialZ() {};
-	void MoveFinalZ() {};
+	void MoveInitialZ() {
+		// Extraer
+		auto transformX = Extensor->component<Transform>();
+		auto transformY = Cabeza->component<Transform>();
+		auto transformZ = Rotor->component<Transform>();
+
+		// Calcular
+		auto dz = .01;
+
+		auto Xi = transformX->matrix();
+		auto Yi = transformY->matrix();
+		auto Zi = transformZ->matrix();
+
+		auto R = glm::rotate<float,glm::precision::highp>(dz,math::vec3(0.f, 0.f, 1.f));
+
+		auto Xf = R * Xi;
+		auto Yf = R * Yi;
+		auto Zf = R * Zi;
+
+		// Aplicar
+		transformX->matrix(Xf);
+		transformY->matrix(Yf);
+		transformZ->matrix(Zf);
+	};
+	void MoveFinalZ() {
+		// Extraer
+		auto transformX = Extensor->component<Transform>();
+		auto transformY = Cabeza->component<Transform>();
+		auto transformZ = Rotor->component<Transform>();
+
+		// Calcular
+		auto dz = -.01;
+
+		auto Xi = transformX->matrix();
+		auto Yi = transformY->matrix();
+		auto Zi = transformZ->matrix();
+
+		auto R = glm::rotate<float, glm::precision::highp>(dz, math::vec3(0.f, 0.f, 1.f));
+
+		auto Xf = R * Xi;
+		auto Yf = R * Yi;
+		auto Zf = R * Zi;
+
+		// Aplicar
+		transformX->matrix(Xf);
+		transformY->matrix(Yf);
+		transformZ->matrix(Zf);
+	};
 	double PositionZ() { return 0; };
 	void PositionZ(double valor) { };
 };
