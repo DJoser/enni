@@ -58,14 +58,34 @@ public:
 	~RobotVirtual() {}
 
 	void ClearPositionX() {
-		auto transform = Rob->component<Transform>();
+		auto transform = Extensor->component<Transform>();
 		transform->matrix(translate(math::vec3(0.f, .10f, 0.f)) * transform->matrix());
 	};
-	void MoveInitialX(){
+	void MoveInitialX() {
+		// Extraer
+		auto transform = Extensor->component<Transform>();
 
+		// Calcular
+		auto dx = 10;
+		auto A = transform->matrix();
+		auto Tx = translate(math::vec3(dx, 0.f, 0.f));
+		auto ATx = Tx * A;
+
+		// Aplicar
+		transform->matrix(ATx);
 	};
-	void MoveFinalX(){
-	
+	void MoveFinalX() {
+		// Extraer
+		auto transform = Extensor->component<Transform>();
+
+		// Calcular
+		auto dx = -10;
+		auto A = transform->matrix();
+		auto Tx = translate(math::vec3(dx, 0.f, 0.f));
+		auto ATx = Tx * A;
+
+		// Aplicar
+		transform->matrix(ATx);
 	};
 	double PositionX() { return 0; };
 	void PositionX(double valor) { };
@@ -82,4 +102,3 @@ public:
 	double PositionZ() { return 0; };
 	void PositionZ(double valor) { };
 };
-

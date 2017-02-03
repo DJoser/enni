@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 {
 	// Interfaz grafica HTML
 	auto overlay = HtmlOverlay::create(argc, argv);
-	
+
 	// Simulador Fisica (Bullet)
 	auto world = bullet::PhysicsWorld::create();
 	world->paused(true);
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 		->registerParser<file::BlenderParser>("blend")
 		->registerParser<file::PNGParser>("png")
 		->registerParser<file::JPEGParser>("jpg");
-	
+
 	auto fxLoader = file::Loader::create(defaultLoader)
 		->queue("effect/Line.effect")
 		->queue("effect/Phong.effect")
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
 				geometry::CubeGeometry::create(assets->context()),
 				material::Material::create()->set({
 					{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
-				}),
+		}),
 				assets->effect("effect/Phong.effect")
 			))
 			->addComponent(bullet::Collider::create(
@@ -162,7 +162,10 @@ int main(int argc, char** argv)
 			}
 
 			if (k->keyIsDown(input::Keyboard::L)) {
-				robotVirtual->ClearPositionX();
+				robotVirtual->MoveInitialX();
+			}
+			if (k->keyIsDown(input::Keyboard::O)) {
+				robotVirtual->MoveFinalX();
 			}
 
 			if (k->keyIsDown(input::Keyboard::U)) {
