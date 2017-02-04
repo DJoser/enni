@@ -299,10 +299,10 @@ int main(int argc, char** argv)
 	fxLoader->load();
 
 	// Conectar robot Real
-	ModuloCfg ModuloX, ModuloY, ModuloZ;
-	//arduino.connect("COM9");
-	RobotReal robotReal = RobotReal(ModuloX, ModuloY, ModuloZ);
-	robotReal.conectar(PUERTO_ARDUINO);
+	//ModuloCfg ModuloX, ModuloY, ModuloZ;
+	arduino.connect("COM9");
+	//RobotReal robotReal = RobotReal(ModuloX, ModuloY, ModuloZ);
+	//robotReal.conectar(PUERTO_ARDUINO);
 
 	canvas->run();
 
