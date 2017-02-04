@@ -173,7 +173,7 @@ public:
 		auto Yi = transformY->matrix();
 		auto Zi = transformZ->matrix();
 
-		auto R = glm::rotate<float, glm::precision::highp>(dz, math::vec3(0.5f, 0.f, 1.f));
+		auto R = glm::rotate<float, glm::precision::highp>(dz, math::vec3(0.f, 0.f, 1.f));
 
 		auto Xf = R * Xi;
 		auto Yf = R * Yi;
