@@ -85,7 +85,7 @@ RobotReal::Ptr configurarRobotReal() {
 	ModuloZ.b14 = -1;
 	ModuloZ.b15 = -1;
 
-	RobotReal::Ptr r = RobotReal::Ptr(new RobotReal(PUERTO_ARDUINO, ModuloX, ModuloY, ModuloZ));
+	RobotReal::Ptr r = RobotReal::Ptr(new RobotReal(ModuloX, ModuloY, ModuloZ));
 	return r;
 }
 
@@ -127,7 +127,8 @@ int main(int argc, char** argv)
 	bool modoCamara = true;
 	IRobotController::Ptr robotActual = nullptr;
 	RobotVirtual::Ptr robotVirtual = nullptr;
-	RobotReal::Ptr robotReal = configurarRobotReal();
+	//RobotReal::Ptr robotReal = configurarRobotReal();
+	ofArduino arduino;
 	
 	// Lista de robots
 	std::vector<IRobotController> robots;
@@ -160,9 +161,7 @@ int main(int argc, char** argv)
 		// Cargar el robot Virtual
 		robotVirtual = RobotVirtual::Ptr(new RobotVirtual(root));
 
-		// Conectar robot Real
-		ModuloCfg ModuloX, ModuloY, ModuloZ;
-		RobotReal::Ptr robotReal = RobotReal::Ptr(new RobotReal(PUERTO_ARDUINO,ModuloX, ModuloY, ModuloZ));
+		
 
 		// Establecer el robot actual
 		robotActual = robotVirtual;
@@ -266,7 +265,7 @@ int main(int argc, char** argv)
 			// Cambio de robot
 			if(k->keyIsDown(input::Keyboard::M)) {
 				tituloPagina->textContent(TITULO_VENTANA + " : Real");
-				robotActual = robotReal;
+				//robotActual = robotReal;
 			}
 			if (k->keyIsDown(input::Keyboard::N)) {
 				tituloPagina->textContent(TITULO_VENTANA + " : Virtual");
@@ -276,17 +275,17 @@ int main(int argc, char** argv)
 
 			// Prueba Arduino
 			if (k->keyIsDown(input::Keyboard::Y)) {
-				ofArduino arduino;
-				arduino.connect("COM9");
-				arduino.sendDigitalPinMode(4, ARD_OUTPUT);
+				//ofArduino arduino;
+				//arduino.connect("COM9");
+				arduino.sendDigitalPinMode(3, ARD_OUTPUT);
 
-				arduino.sendDigital(4, ARD_HIGH);
+				arduino.sendDigital(3, ARD_HIGH);
 			}
 			if (k->keyIsDown(input::Keyboard::H)) {
-				ofArduino arduino;
-				arduino.connect("COM9");
-				arduino.sendDigitalPinMode(4, ARD_OUTPUT);
-				arduino.sendDigital(4, ARD_LOW);
+				//ofArduino arduino;
+				//arduino.connect("COM9");
+				arduino.sendDigitalPinMode(3, ARD_OUTPUT);
+				arduino.sendDigital(3, ARD_LOW);
 			}
 		}
 	});
@@ -298,6 +297,13 @@ int main(int argc, char** argv)
 
 	overlay->load("html/interface.html");
 	fxLoader->load();
+
+	// Conectar robot Real
+	ModuloCfg ModuloX, ModuloY, ModuloZ;
+	//arduino.connect("COM9");
+	RobotReal robotReal = RobotReal(ModuloX, ModuloY, ModuloZ);
+	robotReal.conectar(PUERTO_ARDUINO);
+
 	canvas->run();
 
 	return 0;

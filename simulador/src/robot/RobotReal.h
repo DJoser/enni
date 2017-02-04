@@ -128,12 +128,10 @@ private:
 public:
 	typedef std::shared_ptr<RobotReal> Ptr;
 	
-	RobotReal(std::string COM ,ModuloCfg Modx, ModuloCfg Mody, ModuloCfg Modz) {
+	RobotReal(ModuloCfg Modx, ModuloCfg Mody, ModuloCfg Modz) {
 		Mx = Module::Ptr(new Module(Modx));
 		My = Module::Ptr(new Module(Mody));
 		Mz = Module::Ptr(new Module(Modz));
-		
-		_arduino.connect(COM);
 	}
 	
 	~RobotReal()
@@ -146,9 +144,11 @@ public:
 
 		if (_arduino.isArduinoReady()) {
 			Mx->configurar(_arduino);
-			My->configurar(_arduino);
-			Mz->configurar(_arduino);
+			//My->configurar(_arduino);
+			//Mz->configurar(_arduino);
 		}
+
+		return _arduino.isArduinoReady();
 	}
 
 	void ClearPositionX() { _positionX = 0; };
