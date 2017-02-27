@@ -2,6 +2,7 @@
 class IRobotController
 {
 public:
+	typedef shared_ptr<IRobotController> Ptr;
 	virtual void ClearPositionX() = 0;
 	virtual void MoveInitialX() = 0;
 	virtual void MoveFinalX() = 0;
