@@ -189,11 +189,13 @@ int main(int argc, char** argv)
 			->addComponent(bullet::ColliderDebug::create(assets));
 		root->addChild(plano);
 
-		// Agregar Luces
+		// Agregar Camara
 		camera = scene::Node::create("camera")
-			->addComponent(PerspectiveCamera::create(canvas->aspectRatio()))
-			->addComponent(Renderer::create(0xdcdcdcff))
-			->addComponent(Transform::create(math::translate(math::vec3(0.f, 0.5f, 2.5f)) * math::mat4()));
+			->addComponent(Renderer::create(0x7f7f7fff))
+			->addComponent(Transform::create(
+				math::inverse(math::lookAt(math::vec3(5.f, 1.5f, 5.f), math::vec3(), math::vec3(0.f, 1.f, 0.f))
+			)))
+			->addComponent(Camera::create(math::perspective(.785f, canvas->aspectRatio(), 0.1f, 1000.f)));
 		root->addChild(camera);
 
 		// Agregar Camara
@@ -290,7 +292,7 @@ int main(int argc, char** argv)
 		}
 	});
 
-	auto enterFrame = canvas->enterFrame()->connect([&](Canvas::Ptr canvas, float time, float deltaTime)
+	auto enterFrame = canvas->enterFrame()->connect([&](AbstractCanvas::Ptr canvas, float time, float deltaTime, bool visible)
 	{
 		sceneManager->nextFrame(time, deltaTime);
 	});
