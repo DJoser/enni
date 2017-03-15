@@ -1,6 +1,7 @@
 #pragma once
 #include "IRobotController.h"
 #include "minko/Minko.hpp"
+#include <stack>
 
 using namespace minko;
 using namespace minko::component;
@@ -25,6 +26,7 @@ private:
 	math::mat4 _Miy;
 	math::mat4 _Miz;
 
+	// ###### TODO: Remplazar por un MAP
 	// Transformaciones actuales
 	Transform::Ptr transformX = nullptr;
 	Transform::Ptr transformY = nullptr;
@@ -40,16 +42,23 @@ public:
 		Rob = assets->symbol(ROBOT);
 
 		for (auto node : Rob->children())
-		{
-			std::string nombre = node->name();
+		{			
+			if (node->name() == "Base") { Base = node; }
+			if (node->name() == "Piso") { Piso = node; }
 
-			if (nombre == "Base") { Base = node; }
-			if (nombre == "Cabeza") { Cabeza = node; }
-			if (nombre == "Extensor") { Extensor = node; }
-			if (nombre == "Piso") { Piso = node; }
-			if (nombre == "Rotor") { Rotor = node; }
+			for (auto node : node->children())
+			{
+				if (node->name() == "Rotor") { Rotor = node; }
+				for (auto node : node->children())
+				{
+					if (node->name() == "Cabeza") { Cabeza = node; }
+					for (auto node : node->children())
+					{
+						if (node->name() == "Extensor") { Extensor = node; }
+					}
+				}
+			}
 		}
-
 		// Agregar el robot a la simulacion
 		root->addChild(Rob);
 
@@ -81,17 +90,14 @@ public:
 		transform->matrix(translate(math::vec3(0.f, .10f, 0.f)) * transform->matrix());
 	};
 	void MoveInitialX() {
-		// Extraer
-		auto transform = Extensor->component<Transform>();
-
 		// Calcular
 		auto dx = .01;
-		auto X = transform->matrix();
+		auto X = transformX->matrix();
 		auto Xt = translate(math::vec3(dx, 0.f, 0.f));
 		auto Xf = Xt * X;
 
 		// Aplicar
-		transform->matrix(Xf);
+		transformX->matrix(Xf);
 	};
 	void MoveFinalX() {
 		// Calcular
@@ -113,33 +119,21 @@ public:
 	void MoveInitialY() {
 		// Calcular
 		auto dy = .01;
-
-		auto Xi = transformX->matrix();
 		auto Yi = transformY->matrix();
-
 		auto T = translate(math::vec3(0.f,  0.f, dy));
-
-		auto Xf = T * Xi;
 		auto Yf = T * Yi;
 
 		// Aplicar
-		transformX->matrix(Xf);
 		transformY->matrix(Yf);
 	};
 	void MoveFinalY() {
 		// Calcular
 		auto dy = -.01;
-
-		auto Xi = transformX->matrix();
 		auto Yi = transformY->matrix();
-
 		auto T = translate(math::vec3(0.f, 0.f, dy));
-
-		auto Xf = T * Xi;
 		auto Yf = T * Yi;
 
 		// Aplicar
-		transformX->matrix(Xf);
 		transformY->matrix(Yf);
 	};
 	double PositionY() { return 0; };
@@ -149,39 +143,21 @@ public:
 	void MoveInitialZ() {
 		// Calcular
 		auto dz = .01;
-
-		auto Xi = transformX->matrix();
-		auto Yi = transformY->matrix();
 		auto Zi = transformZ->matrix();
-
 		auto R = glm::rotate<float,glm::precision::highp>(dz,math::vec3(0.f, 0.f, 1.f));
-
-		auto Xf = R * Xi;
-		auto Yf = R * Yi;
 		auto Zf = R * Zi;
 
 		// Aplicar
-		transformX->matrix(Xf);
-		transformY->matrix(Yf);
 		transformZ->matrix(Zf);
 	};
 	void MoveFinalZ() {
 		// Calcular
 		auto dz = -.01;
-
-		auto Xi = transformX->matrix();
-		auto Yi = transformY->matrix();
 		auto Zi = transformZ->matrix();
-
 		auto R = glm::rotate<float, glm::precision::highp>(dz, math::vec3(0.f, 0.f, 1.f));
-
-		auto Xf = R * Xi;
-		auto Yf = R * Yi;
 		auto Zf = R * Zi;
 
 		// Aplicar
-		transformX->matrix(Xf);
-		transformY->matrix(Yf);
 		transformZ->matrix(Zf);
 	};
 	double PositionZ() { return 0; };

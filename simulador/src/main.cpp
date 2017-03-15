@@ -161,8 +161,6 @@ int main(int argc, char** argv)
 		// Cargar el robot Virtual
 		robotVirtual = RobotVirtual::Ptr(new RobotVirtual(root));
 
-		
-
 		// Establecer el robot actual
 		robotActual = robotVirtual;
 
