@@ -159,6 +159,11 @@ app.controller('dipositivosCtrl', function ($scope) {
         });
     };
 });
+
+app.controller('eventosCtrl', function ($scope) {
+
+});
+
 app.config(function ($routeProvider,$locationProvider) {
     $routeProvider
         .when("/", {
