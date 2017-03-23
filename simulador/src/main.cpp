@@ -90,7 +90,15 @@ RobotReal::Ptr configurarRobotReal() {
 }
 
 // Interfaz Grafica
+dom::AbstractDOM::Ptr gameInterfaceDom;
 dom::AbstractDOMElement::Ptr tituloPagina;
+dom::AbstractDOMElement::Ptr objectTree;
+dom::AbstractDOMElement::Ptr objectProperty;
+dom::AbstractDOMElement::Ptr btnControlLeft;
+
+// Eventos interfaz
+Signal<minko::dom::AbstractDOM::Ptr, std::string>::Slot onloadSlot;
+Signal<minko::dom::AbstractDOMMouseEvent::Ptr>::Slot onclickSlot;
 
 int main(int argc, char** argv)
 {
@@ -140,17 +148,28 @@ int main(int argc, char** argv)
 		->addComponent(overlay);
 	scene::Node::Ptr plano = nullptr;
 	scene::Node::Ptr camera = nullptr;
-
+	
 	auto onloadSlot = overlay->onload()->connect([=](minko::dom::AbstractDOM::Ptr dom, std::string page)
 	{
-		auto filename = dom->fileName();
-
 		if (!dom->isMain())
 			return;
 
+		// Objetos del simulador
+		//gameInterfaceDom = dom;
 		tituloPagina = dom::AbstractDOMElement::Ptr(dom->getElementById("logo-container").get());
+		objectTree = dom::AbstractDOMElement::Ptr(dom->getElementById("objectTree").get());
+		objectProperty = dom::AbstractDOMElement::Ptr(dom->getElementById("objectProperty").get());
 
-		auto contenido = dom->getElementById("logo-container")->textContent();
+		btnControlLeft = dom::AbstractDOMElement::Ptr(dom->getElementById("menuControl").get());
+		btnControlLeft->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
+		{
+			tituloPagina->textContent("Control Cliked");
+		});
+
+		/*onclickSlot = dom->document()->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
+		{
+			tituloPagina->textContent("Clicked");
+		});*/
 	});
 
 	auto fxComplete = fxLoader->complete()->connect([&](file::Loader::Ptr loader)
