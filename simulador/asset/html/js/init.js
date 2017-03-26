@@ -159,6 +159,15 @@ app.controller('dipositivosCtrl', function ($scope) {
         });
     };
 });
+
+app.controller('eventosCtrl', function ($scope) {
+
+});
+
+app.controller('simuladorCtrl', function ($scope) {
+
+});
+
 app.config(function ($routeProvider,$locationProvider) {
     $routeProvider
         .when("/", {
@@ -180,6 +189,10 @@ app.config(function ($routeProvider,$locationProvider) {
         .when("/configuracion", {
             templateUrl: "pages/configuracion.html",
             controller: "eventosCtrl"
+        })
+        .when("/simulador", {
+            templateUrl: "pages/simulador.html",
+            controller: "simuladorCtrl"
         });
 
     $routeProvider.otherwise( { redirectTo: '/' });
