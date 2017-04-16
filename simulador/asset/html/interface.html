@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="iotApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+    <title>E.N.N.I.</title>
+    <!-- CSS  -->
+    <link href="./css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+    <link href="./css/nv.d3.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+    <link href="./css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+</head>
+<body ng-controller="mainCtrl">
+
+<header>
+    <div class="navbar-fixed">
+        <nav class="grey darken-3 white-text" role="navigation">
+            <div class="nav-wrapper container">
+                <a id="logo-container" href="#" class="brand-logo">E.N.N.I.</a>
+                <ul class="right hide-on-med-and-down">
+                    <li><a class="waves-effect" id="menuControl" href="#!/dashboard">Control</a></li>
+                    <li><div class="divider"></div></li>
+                    <li><a class="waves-effect" href="#!/dispositivos">Dispositivos</a></li>
+                    <li><a class="waves-effect" href="#!/eventos">Eventos</a></li>
+                    <li><a class="waves-effect" href="#!/simulador">Simulador</a></li>
+                    <!--<li><a class="waves-effect" href="#!/configuracion">Configuracion</a></li>-->
+                </ul>
+                <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+            </div>
+        </nav>
+    </div>
+
+    <ul id="nav-mobile" class="side-nav white">
+        <li><div class="userView grey darken-3">
+            <a href="#"><img class="circle" src="images/Ceti.png"></a>
+            <a href="#"><span class="white-text name">Centro de Enseñanza Técnica Industrial</span></a>
+            <a href="#"><span class="white-text email">Tyson</span></a>
+        </div></li>
+        <li><a class="waves-effect" id="smenuControl" href="#!/dashboard"><i class="material-icons">dashboard</i>Control</a></li>
+        <li><div class="divider"></div></li>
+        <li><a class="waves-effect" href="#!/dispositivos"><i class="material-icons">settings_remote</i>Dispositivos</a></li>
+        <li><a class="waves-effect" href="#!/eventos"><i class="material-icons">assignment</i>Eventos</a></li>
+        <li><a class="waves-effect" href="#!/simulador"><i class="material-icons">assignment</i>Simulador</a></li>
+        <!--<li><a class="waves-effect" href="#!/configuracion"><i class="material-icons">settings_applications</i>Configuracion</a></li>-->
+    </ul>
+</header>
+
+
+<main>
+    <div ng-view></div>
+</main>
+
+<footer class="page-footer orange">
+    <div class="container">
+        <div class="row grey-text text-lighten-4">
+            <!--<div class="col l6 s12">
+                <p class="grey-text text-lighten-4">footer</p>
+            </div>-->
+        </div>
+    </div>
+</footer>
+
+<!--  Scripts-->
+<script src="./js/jquery-3.1.1.js"></script>
+
+<script src="./js/materialize.js"></script>
+<script src="./js/angular.js"></script>
+<script src="./js/angular-route.js"></script>
+
+<script src="./js/d3.js"></script>
+<script src="./js/nv.d3.js"></script>
+<script src="./js/angular-nvd3.js"></script>
+
+<script src="./js/Chart.js"></script>
+<script src="./js/angular-chart.js"></script>
+
+<script src="./js/blockly_compressed.js"></script>
+<script src="./js/blocks_compressed.js"></script>
+<script src="./js/python_compressed.js"></script>
+<script src="./js/msg/js/es.js"></script>
+
+<script src="./js/init.js"></script>
+
+<script>
+    $('.button-collapse').sideNav({
+                closeOnClick: true // Closes side-nav on <a> clicks, useful for Angular/Meteor
+            }
+    );
+</script>
+
+</body>
+</html>

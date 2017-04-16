@@ -1,0 +1,22 @@
+<div class="container">
+    <div class="row">
+        <div class="col s12 m6" ng-repeat="nota in notas">
+            <div class="card sticky-action">
+                <div class="card-content">
+                    <span class="card-title">{{nota.titulo}}</span>
+                    <nvd3 options="nota.options" data="nota.data"></nvd3>
+                </div>
+                <div class="card-action">
+                    <div class="switch">
+                        <label>
+                            Off
+                            <input type="checkbox">
+                            <span class="lever"></span>
+                            On
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
