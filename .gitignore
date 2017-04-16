@@ -28,3 +28,5 @@
 *.app
 
 simulador/asset/html/\.idea/
+
+docs/\.idea/
