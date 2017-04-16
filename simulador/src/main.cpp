@@ -24,6 +24,7 @@ dom::AbstractDOMElement::Ptr btnControlLeft;
 // Eventos interfaz
 Signal<minko::dom::AbstractDOM::Ptr, std::string>::Slot onloadSlot;
 Signal<minko::dom::AbstractDOMMouseEvent::Ptr>::Slot onclickSlot;
+Signal<dom::AbstractDOM::Ptr, std::string>::Slot onmessage;
 //------------------------------------------------------------------------------------
 Canvas::Ptr canvas;
 
@@ -130,6 +131,11 @@ void overlay_onload(minko::dom::AbstractDOM::Ptr dom, std::string page)
 	onclickSlot = dom->document()->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
 	{
 		tituloPagina->textContent("Clicked");
+	});
+
+	onmessage = dom->onmessage()->connect([=](dom::AbstractDOM::Ptr dom, std::string string) {
+		std::cout << "Ejecutar codigo: "<< std::endl << string <<std::endl;
+		PyRun_SimpleString(string.c_str());
 	});
 }
 
