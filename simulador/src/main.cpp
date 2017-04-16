@@ -5,89 +5,14 @@
 #include "minko/MinkoASSIMP.hpp"
 #include "minko/MinkoJPEG.hpp"
 #include "minko/MinkoPNG.hpp"
-#include "SDL.h"
-#include "openFrameworks/ofSerial.h"
-#include "openFrameworks/ofArduino.h"
-#include "robot/RobotReal.h"
-#include "robot/RobotVirtual.h"
-
+#include "Python.h"
 
 using namespace minko;
 using namespace minko::component;
+using namespace minko::component::bullet;
 
 // Constantes
 CONST std::string TITULO_VENTANA = "E.N.N.I.";
-CONST std::string PUERTO_ARDUINO = "COM9";
-
-
-RobotReal::Ptr configurarRobotReal() {
-	ModuloCfg ModuloX, ModuloY, ModuloZ;
-	ModuloX.f_carrea1 = 18;
-	ModuloX.f_carrea2 = 19;
-	ModuloX.motor_negativo = 1;
-	ModuloX.motor_positivo = 0;
-	ModuloX.b0 = 22;
-	ModuloX.b1 = 23;
-	ModuloX.b2 = 24;
-	ModuloX.b3 = 25;
-	ModuloX.b4 = 26;
-	ModuloX.b5 = 27;
-	ModuloX.b6 = 28;
-	ModuloX.b7 = 29;
-	ModuloX.b8 = 30;
-	ModuloX.b9 = 31;
-	ModuloX.b10 = 32;
-	ModuloX.b11 = 33;
-	ModuloX.b12 = 34;
-	ModuloX.b13 = 35;
-	ModuloX.b14 = 36;
-	ModuloX.b15 = 37;
-
-	ModuloY.f_carrea1 = 20;
-	ModuloY.f_carrea2 = 21;
-	ModuloY.motor_negativo = 3;
-	ModuloY.motor_positivo = 2;
-	ModuloY.b0 = 38;
-	ModuloY.b1 = 39;
-	ModuloY.b2 = 40;
-	ModuloY.b3 = 41;
-	ModuloY.b4 = 42;
-	ModuloY.b5 = 43;
-	ModuloY.b6 = 44;
-	ModuloY.b7 = 45;
-	ModuloY.b8 = 46;
-	ModuloY.b9 = 47;
-	ModuloY.b10 = 48;
-	ModuloY.b11 = 49;
-	ModuloY.b12 = 50;
-	ModuloY.b13 = 51;
-	ModuloY.b14 = 52;
-	ModuloY.b15 = 53;
-
-	ModuloZ.f_carrea1 = -1;
-	ModuloZ.f_carrea2 = -1;
-	ModuloZ.motor_negativo = -1;
-	ModuloZ.motor_positivo = -1;
-	ModuloZ.b0 = -1;
-	ModuloZ.b1 = -1;
-	ModuloZ.b2 = -1;
-	ModuloZ.b3 = -1;
-	ModuloZ.b4 = -1;
-	ModuloZ.b5 = -1;
-	ModuloZ.b6 = -1;
-	ModuloZ.b7 = -1;
-	ModuloZ.b8 = -1;
-	ModuloZ.b9 = -1;
-	ModuloZ.b10 = -1;
-	ModuloZ.b11 = -1;
-	ModuloZ.b12 = -1;
-	ModuloZ.b13 = -1;
-	ModuloZ.b14 = -1;
-	ModuloZ.b15 = -1;
-
-	RobotReal::Ptr r = RobotReal::Ptr(new RobotReal(ModuloX, ModuloY, ModuloZ));
-	return r;
-}
 
 // Interfaz Grafica
 dom::AbstractDOM::Ptr gameInterfaceDom;
@@ -99,23 +24,205 @@ dom::AbstractDOMElement::Ptr btnControlLeft;
 // Eventos interfaz
 Signal<minko::dom::AbstractDOM::Ptr, std::string>::Slot onloadSlot;
 Signal<minko::dom::AbstractDOMMouseEvent::Ptr>::Slot onclickSlot;
+Signal<dom::AbstractDOM::Ptr, std::string>::Slot onmessage;
+//------------------------------------------------------------------------------------
+Canvas::Ptr canvas;
 
+HtmlOverlay::Ptr overlay;
+PhysicsWorld::Ptr world;
+SceneManager::Ptr sceneManager;
+
+scene::Node::Ptr root = nullptr;
+scene::Node::Ptr plano = nullptr;
+scene::Node::Ptr camera = nullptr;
+
+static int numargs = 0;
+//------------------------------------------------------------------------------------
+static PyObject* enni_numargs(PyObject *self, PyObject *args)
+{
+	if (!PyArg_ParseTuple(args, ":numargs"))
+		return NULL;
+	return PyLong_FromLong(numargs);
+}
+//------------------------------------------------------------------------------------
+// pyConfig.h
+static PyMethodDef EnniMethods[] = {
+	{ "numargs", enni_numargs, METH_VARARGS, "Return the number of arguments received by the process." },
+	{ NULL, NULL, 0, NULL }
+};
+
+static PyModuleDef EnniModule = {
+	PyModuleDef_HEAD_INIT, "enni", NULL, -1, EnniMethods,NULL, NULL, NULL, NULL
+};
+
+static PyObject* PyInit_enni(void)
+{
+	return PyModule_Create(&EnniModule);
+}
+//------------------------------------------------------------------------------------
+void defaulLoader_complete(file::Loader::Ptr loader)
+{
+	// Cargar default shader
+	sceneManager->assets()->loader()->options()->effect(
+		sceneManager->assets()->effect("effect/Phong.effect")
+	);
+
+	// Crear el plano de simulacion
+	float GROUND_WIDTH = 5.f;
+	float GROUND_DEPTH = 5.f;
+	float GROUND_THICK = 0.1f;
+	auto planoMatrix = math::scale(math::vec3(GROUND_WIDTH, GROUND_THICK, GROUND_DEPTH)) * math::mat4();
+	plano = scene::Node::create("plano")
+		->addComponent(Transform::create(planoMatrix))
+		->addComponent(Surface::create(
+			geometry::CubeGeometry::create(sceneManager->assets()->context()),
+			material::Material::create()->set({
+				{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
+	}),
+			sceneManager->assets()->effect("effect/Phong.effect")
+		))
+		->addComponent(bullet::Collider::create(
+			bullet::ColliderData::create(
+				0.f, // static object (no mass)
+				bullet::BoxShape::create(GROUND_WIDTH * 0.5f, GROUND_THICK * 0.5f, GROUND_DEPTH * 0.5f)
+			)
+		))
+		->addComponent(bullet::ColliderDebug::create(sceneManager->assets()));
+	root->addChild(plano);
+
+	// Agregar Camara
+	camera = scene::Node::create("camera")
+		->addComponent(Renderer::create(0x7f7f7fff))
+		->addComponent(Transform::create(
+			math::inverse(math::lookAt(math::vec3(5.f, 1.5f, 5.f), math::vec3(), math::vec3(0.f, 1.f, 0.f))
+			)))
+		->addComponent(Camera::create(math::perspective(.785f, canvas->aspectRatio(), 0.1f, 1000.f)));
+	root->addChild(camera);
+
+	// Agregar Camara
+	auto lights = scene::Node::create("lights")
+		->addComponent(DirectionalLight::create())
+		->addComponent(AmbientLight::create())
+		->addComponent(Transform::create(math::inverse(math::lookAt(
+			math::vec3(0.f, 2.f, 5.f),
+			math::vec3(0.f, 0.f, 0.f),
+			math::vec3(0.f, 1.f, 0.f)
+		))));
+	root->addChild(lights);
+}
+
+void overlay_onload(minko::dom::AbstractDOM::Ptr dom, std::string page)
+{
+	if (!dom->isMain())
+		return;
+
+	// Objetos del simulador
+	//gameInterfaceDom = dom;
+	tituloPagina = dom::AbstractDOMElement::Ptr(dom->getElementById("logo-container").get());
+	objectTree = dom::AbstractDOMElement::Ptr(dom->getElementById("objectTree").get());
+	objectProperty = dom::AbstractDOMElement::Ptr(dom->getElementById("objectProperty").get());
+
+	btnControlLeft = dom::AbstractDOMElement::Ptr(dom->getElementById("menuControl").get());
+	btnControlLeft->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
+	{
+		tituloPagina->textContent("Control Cliked");
+	});
+
+	onclickSlot = dom->document()->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
+	{
+		tituloPagina->textContent("Clicked");
+	});
+
+	onmessage = dom->onmessage()->connect([=](dom::AbstractDOM::Ptr dom, std::string string) {
+		std::cout << "Ejecutar codigo: "<< std::endl << string <<std::endl;
+		PyRun_SimpleString(string.c_str());
+	});
+}
+
+void keyboard_keyDown(input::Keyboard::Ptr k) {
+	// Control Camara
+	auto transform = camera->component<Transform>();
+	if (k->keyIsDown(input::Keyboard::A)) {
+		transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
+	}
+	if (k->keyIsDown(input::Keyboard::D)) {
+		transform->matrix(translate(math::vec3(.1f, 0.f, 0.f)) * transform->matrix());
+	}
+	if (k->keyIsDown(input::Keyboard::DOWN)) {
+		transform->matrix(translate(math::vec3(0.f, -.1f, 0.f)) * transform->matrix());
+	}
+	if (k->keyIsDown(input::Keyboard::UP)) {
+		transform->matrix(translate(math::vec3(0.f, .1f, 0.f)) * transform->matrix());
+	}
+	if (k->keyIsDown(input::Keyboard::W)) {
+		transform->matrix(translate(math::vec3(0.f, 0.f, -.1f)) * transform->matrix());
+	}
+	if (k->keyIsDown(input::Keyboard::S)) {
+		transform->matrix(translate(math::vec3(0.f, 0.f, .1f)) * transform->matrix());
+	}
+	if (k->keyIsDown(input::Keyboard::ESCAPE)) {
+		canvas->quit();
+	}
+	if (k->keyIsDown(input::Keyboard::M)) {
+		world->paused(false);
+	}
+
+	// Cambio de robot
+	if (k->keyIsDown(input::Keyboard::M)) {
+		tituloPagina->textContent(TITULO_VENTANA + " : Real");
+	}
+	if (k->keyIsDown(input::Keyboard::N)) {
+		tituloPagina->textContent(TITULO_VENTANA + " : Virtual");
+	}
+	if (k->keyIsDown(input::Keyboard::Y)) {
+		PyRun_SimpleString(
+			"from time import time,ctime\n"
+			"print('Today is', ctime(time()))\n"
+			//"import enni\n"
+			//"print('Number of arguments', enni.numargs())"
+		);
+	}
+	if (k->keyIsDown(input::Keyboard::U)) {
+		PyRun_SimpleString(
+			"print('Today is', ctime(time()))\n"
+			//"import enni\n"
+			//"print('Number of arguments', enni.numargs())"
+		);
+	}
+}
+
+void canvas_enterFrame(AbstractCanvas::Ptr canvas, float time, float deltaTime, bool visible)
+{
+	sceneManager->nextFrame(time, deltaTime);
+};
+//------------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
+	// Inicializar la interfaz del programa
+	numargs = argc;
+	PyImport_AppendInittab("enni", &PyInit_enni);
+
+	//----------------------------------------------------------------------------------
 	// Interfaz grafica HTML
-	auto overlay = HtmlOverlay::create(argc, argv);
+	overlay = HtmlOverlay::create(argc, argv);
 
 	// Simulador Fisica (Bullet)
-	auto world = bullet::PhysicsWorld::create();
+	world = bullet::PhysicsWorld::create();
 	world->paused(true);
 
 	// Canvas de dibujo
-	auto canvas = Canvas::create(TITULO_VENTANA, 960, 540, Canvas::Flags::CHROMELESS);
-	auto sceneManager = SceneManager::create(canvas);
+	canvas = Canvas::create(TITULO_VENTANA, 960, 540);
+	sceneManager = SceneManager::create(canvas);
 	auto assets = sceneManager->assets();
 	auto defaultLoader = sceneManager->assets()->loader();
 	auto defaultOptions = defaultLoader->options();
-
+	//----------------------------------------------------------------------------------
+	// Nodos
+	root = scene::Node::create("root")
+		->addComponent(sceneManager)
+		->addComponent(world)
+		->addComponent(overlay);
+	//----------------------------------------------------------------------------------
 	// Cargar Assets
 	defaultOptions
 		->generateMipmaps(true)
@@ -125,205 +232,26 @@ int main(int argc, char** argv)
 		->registerParser<file::PNGParser>("png")
 		->registerParser<file::JPEGParser>("jpg");
 
-	auto fxLoader = file::Loader::create(defaultLoader)
+	defaultLoader
 		->queue("effect/Line.effect")
 		->queue("effect/Phong.effect")
-		->queue("effect/Basic.effect")
-		->queue("robot/tyson.dae");
+		->queue("effect/Basic.effect");
+	//->queue("robot/tyson.dae")
 
-	// Variables de control
-	bool modoCamara = true;
-	IRobotController::Ptr robotActual = nullptr;
-	RobotVirtual::Ptr robotVirtual = nullptr;
-	//RobotReal::Ptr robotReal = configurarRobotReal();
-	ofArduino arduino;
-	
-	// Lista de robots
-	std::vector<IRobotController> robots;
+	// Conectar eventos
+	auto a = overlay->onload()->connect(overlay_onload);
+	auto b = defaultLoader->complete()->connect(defaulLoader_complete);
+	auto c = canvas->keyboard()->keyDown()->connect(keyboard_keyDown);
+	auto d = canvas->enterFrame()->connect(canvas_enterFrame);
 
-	// Nodos
-	auto root = scene::Node::create("root")
-		->addComponent(sceneManager)
-		->addComponent(world)
-		->addComponent(overlay);
-	scene::Node::Ptr plano = nullptr;
-	scene::Node::Ptr camera = nullptr;
-	
-	auto onloadSlot = overlay->onload()->connect([=](minko::dom::AbstractDOM::Ptr dom, std::string page)
-	{
-		if (!dom->isMain())
-			return;
-
-		// Objetos del simulador
-		//gameInterfaceDom = dom;
-		tituloPagina = dom::AbstractDOMElement::Ptr(dom->getElementById("logo-container").get());
-		objectTree = dom::AbstractDOMElement::Ptr(dom->getElementById("objectTree").get());
-		objectProperty = dom::AbstractDOMElement::Ptr(dom->getElementById("objectProperty").get());
-
-		btnControlLeft = dom::AbstractDOMElement::Ptr(dom->getElementById("menuControl").get());
-		btnControlLeft->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
-		{
-			tituloPagina->textContent("Control Cliked");
-		});
-
-		/*onclickSlot = dom->document()->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
-		{
-			tituloPagina->textContent("Clicked");
-		});*/
-	});
-
-	auto fxComplete = fxLoader->complete()->connect([&](file::Loader::Ptr loader)
-	{
-		// Cargar default shader
-		defaultLoader->options()->effect(assets->effect("effect/Phong.effect"));
-
-		// Cargar el robot Virtual
-		robotVirtual = RobotVirtual::Ptr(new RobotVirtual(root));
-
-		// Establecer el robot actual
-		robotActual = robotVirtual;
-
-		// Crear el plano de simulacion
-		float GROUND_WIDTH = 5.f;
-		float GROUND_DEPTH = 5.f;
-		float GROUND_THICK = 0.1f;
-		auto planoMatrix = math::scale(math::vec3(GROUND_WIDTH, GROUND_THICK, GROUND_DEPTH)) * math::mat4();
-		plano = scene::Node::create("plano")
-			->addComponent(Transform::create(planoMatrix))
-			->addComponent(Surface::create(
-				geometry::CubeGeometry::create(assets->context()),
-				material::Material::create()->set({
-					{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
-		}),
-				assets->effect("effect/Phong.effect")
-			))
-			->addComponent(bullet::Collider::create(
-				bullet::ColliderData::create(
-					0.f, // static object (no mass)
-					bullet::BoxShape::create(GROUND_WIDTH * 0.5f, GROUND_THICK * 0.5f, GROUND_DEPTH * 0.5f)
-				)
-			))
-			->addComponent(bullet::ColliderDebug::create(assets));
-		root->addChild(plano);
-
-		// Agregar Camara
-		camera = scene::Node::create("camera")
-			->addComponent(Renderer::create(0x7f7f7fff))
-			->addComponent(Transform::create(
-				math::inverse(math::lookAt(math::vec3(5.f, 1.5f, 5.f), math::vec3(), math::vec3(0.f, 1.f, 0.f))
-			)))
-			->addComponent(Camera::create(math::perspective(.785f, canvas->aspectRatio(), 0.1f, 1000.f)));
-		root->addChild(camera);
-
-		// Agregar Camara
-		auto lights = scene::Node::create("lights")
-			->addComponent(DirectionalLight::create())
-			->addComponent(AmbientLight::create())
-			->addComponent(Transform::create(math::inverse(math::lookAt(
-				math::vec3(0.f, 2.f, 5.f),
-				math::vec3(0.f, 0.f, 0.f),
-				math::vec3(0.f, 1.f, 0.f)
-			))));
-		root->addChild(lights);
-	});
-
-	auto keyDown = canvas->keyboard()->keyDown()->connect([&](input::Keyboard::Ptr k) {
-		if (modoCamara)
-		{
-			// Control Camara
-			auto transform = camera->component<Transform>();
-			if (k->keyIsDown(input::Keyboard::A)) {
-				transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
-			}
-			if (k->keyIsDown(input::Keyboard::D)) {
-				transform->matrix(translate(math::vec3(.1f, 0.f, 0.f)) * transform->matrix());
-			}
-			if (k->keyIsDown(input::Keyboard::DOWN)) {
-				transform->matrix(translate(math::vec3(0.f, -.1f, 0.f)) * transform->matrix());
-			}
-			if (k->keyIsDown(input::Keyboard::UP)) {
-				transform->matrix(translate(math::vec3(0.f, .1f, 0.f)) * transform->matrix());
-			}
-			if (k->keyIsDown(input::Keyboard::W)) {
-				transform->matrix(translate(math::vec3(0.f, 0.f, -.1f)) * transform->matrix());
-			}
-			if (k->keyIsDown(input::Keyboard::S)) {
-				transform->matrix(translate(math::vec3(0.f, 0.f, .1f)) * transform->matrix());
-			}
-			if (k->keyIsDown(input::Keyboard::ESCAPE)) {
-				canvas->quit();
-			}
-			if (k->keyIsDown(input::Keyboard::F)) {
-				SDL_MaximizeWindow(canvas->window());
-			}
-			if (k->keyIsDown(input::Keyboard::M)) {
-				world->paused(false);
-			}
-
-
-			// Control del robot
-			if (k->keyIsDown(input::Keyboard::O)) {
-				robotActual->MoveInitialX();
-			}
-			if (k->keyIsDown(input::Keyboard::L)) {
-				robotActual->MoveFinalX();
-			}
-			if (k->keyIsDown(input::Keyboard::I)) {
-				robotActual->MoveInitialY();
-			}
-			if (k->keyIsDown(input::Keyboard::K)) {
-				robotActual->MoveFinalY();
-			}
-			if (k->keyIsDown(input::Keyboard::U)) {
-				robotActual->MoveInitialZ();
-			}
-			if (k->keyIsDown(input::Keyboard::J)) {
-				robotActual->MoveFinalZ();
-			}
-
-			// Cambio de robot
-			if(k->keyIsDown(input::Keyboard::M)) {
-				tituloPagina->textContent(TITULO_VENTANA + " : Real");
-				//robotActual = robotReal;
-			}
-			if (k->keyIsDown(input::Keyboard::N)) {
-				tituloPagina->textContent(TITULO_VENTANA + " : Virtual");
-				robotActual = robotVirtual;
-			}
-
-
-			// Prueba Arduino
-			if (k->keyIsDown(input::Keyboard::Y)) {
-				//ofArduino arduino;
-				//arduino.connect("COM9");
-				arduino.sendDigitalPinMode(3, ARD_OUTPUT);
-
-				arduino.sendDigital(3, ARD_HIGH);
-			}
-			if (k->keyIsDown(input::Keyboard::H)) {
-				//ofArduino arduino;
-				//arduino.connect("COM9");
-				arduino.sendDigitalPinMode(3, ARD_OUTPUT);
-				arduino.sendDigital(3, ARD_LOW);
-			}
-		}
-	});
-
-	auto enterFrame = canvas->enterFrame()->connect([&](AbstractCanvas::Ptr canvas, float time, float deltaTime, bool visible)
-	{
-		sceneManager->nextFrame(time, deltaTime);
-	});
-
+	// Inciar el programa
 	overlay->load("html/interface.html");
-	fxLoader->load();
+	defaultLoader->load();
+	defaulLoader_complete(defaultLoader);
 
-	// Conectar robot Real
-	//ModuloCfg ModuloX, ModuloY, ModuloZ;
-	arduino.connect("COM9");
-	//RobotReal robotReal = RobotReal(ModuloX, ModuloY, ModuloZ);
-	//robotReal.conectar(PUERTO_ARDUINO);
-
+	Py_Initialize();
 	canvas->run();
+	if(Py_FinalizeEx() < 0) exit(120);
 
-	return 0;
+	return EXIT_SUCCESS;
 }

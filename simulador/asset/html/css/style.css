@@ -46,3 +46,13 @@ body {
 main {
     flex: 1 0 auto;
 }
+
+/* Blocky Style */
+#blocklyArea{
+    position: absolute;
+    width: 100%;
+    height: 87%;
+}
+#blocklyDiv{
+    position: absolute;
+}
