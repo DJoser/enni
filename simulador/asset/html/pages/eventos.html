@@ -1,5 +1,26 @@
-<a class="waves-effect waves-light btn" onclick="Minko.sendMessage(Blockly.Python.workspaceToCode(workspace));">Ejecutar</a>
 <div id="blocklyArea">
+    <div style="position: relative; height: 100px;">
+        <div class="fixed-action-btn horizontal" style="position: absolute; display: inline-block; right: 24px;">
+            <a class="btn-floating btn-large red">
+                <i class="large material-icons">mode_edit</i>
+            </a>
+            <ul>
+                <li><a class="btn-floating red"
+                       onclick="var code = Blockly.Python.workspaceToCode(workspace);
+                               console.log(code);
+                               Minko.sendMessage(code);">
+                    <i class="material-icons">insert_chart</i></a>
+                </li>
+                <li>
+                    <a class="btn-floating yellow darken-1" onclick="workspace.updateToolbox(mathCategory);">
+                        <i class="material-icons">format_quote</i>
+                    </a>
+                </li>
+                <li><a class="btn-floating green"><i class="material-icons">publish</i></a></li>
+                <li><a class="btn-floating blue"><i class="material-icons">attach_file</i></a></li>
+            </ul>
+        </div>
+    </div>
     <div id="blocklyDiv"></div>
 </div>
 <xml id="toolbox" style="display: none">
@@ -21,6 +42,11 @@
     </block>
 </xml>
 <script>
+    var mathCategory = '<xml>';
+    mathCategory += '  <block type="controls_if"></block>';
+    mathCategory += '  <block type="controls_whileUntil"></block>';
+    mathCategory += '</xml>';
+
     var blocklyArea = document.getElementById('blocklyArea');
     var blocklyDiv = document.getElementById('blocklyDiv');
     var workspace = Blockly.inject(blocklyDiv,
