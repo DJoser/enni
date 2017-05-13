@@ -31,6 +31,5 @@ simulador/asset/html/\.idea/
 
 docs/\.idea/
 
-simulador/asset/closure-library/
-
-simulador/asset/blockly/
+simulador/asset/html/closure-library/
+simulador/asset/html/blockly/
