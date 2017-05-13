@@ -26,6 +26,7 @@ Signal<minko::dom::AbstractDOM::Ptr, std::string>::Slot onloadSlot;
 Signal<minko::dom::AbstractDOMMouseEvent::Ptr>::Slot onclickSlot;
 Signal<dom::AbstractDOM::Ptr, std::string>::Slot onmessage;
 //------------------------------------------------------------------------------------
+// Data
 Canvas::Ptr canvas;
 
 HtmlOverlay::Ptr overlay;
@@ -38,16 +39,30 @@ scene::Node::Ptr camera = nullptr;
 
 static int numargs = 0;
 //------------------------------------------------------------------------------------
-static PyObject* enni_numargs(PyObject *self, PyObject *args)
+// Operadores C Api
+
+// Cargar Robot
+
+//------------------------------------------------------------------------------------
+// Operadores Python Apy
+static PyObject* enni_zen(PyObject *self, PyObject *args)
 {
 	if (!PyArg_ParseTuple(args, ":numargs"))
 		return NULL;
-	return PyLong_FromLong(numargs);
+	return PyUnicode_FromString(
+		"1. CORAJE"
+		"Un samurai lleva implícito el coraje; es coraje."
+		"Vive la vida de forma plena, completa, maravillosa."
+		"El coraje heroico no es ciego, es inteligente y fuerte."
+		"El samurai desarrolla el coraje y hace que su cuerpo lo"
+		"sea ejerciendo el control sobre el mismo y reemplazando"
+		"el miedo por el respeto y la precaución."
+	);
 }
 //------------------------------------------------------------------------------------
 // pyConfig.h
 static PyMethodDef EnniMethods[] = {
-	{ "numargs", enni_numargs, METH_VARARGS, "Return the number of arguments received by the process." },
+	{ "zen", enni_zen, METH_VARARGS, "Retorna el Zen de E.N.N.I." },
 	{ NULL, NULL, 0, NULL }
 };
 
@@ -175,18 +190,22 @@ void keyboard_keyDown(input::Keyboard::Ptr k) {
 		tituloPagina->textContent(TITULO_VENTANA + " : Virtual");
 	}
 	if (k->keyIsDown(input::Keyboard::Y)) {
+		auto programName  = std::string("Py_Keyboard");
+		size_t size;
+
+		Py_SetProgramName(Py_DecodeLocale(programName.c_str(), &size));
+
+
 		PyRun_SimpleString(
 			"from time import time,ctime\n"
 			"print('Today is', ctime(time()))\n"
-			//"import enni\n"
-			//"print('Number of arguments', enni.numargs())"
 		);
+		std::cout << Py_EncodeLocale(Py_GetPath(),&size) << std::endl;
 	}
 	if (k->keyIsDown(input::Keyboard::U)) {
 		PyRun_SimpleString(
-			"print('Today is', ctime(time()))\n"
-			//"import enni\n"
-			//"print('Number of arguments', enni.numargs())"
+			"import enni\n"
+			"print(enni.zen())"
 		);
 	}
 }
