@@ -1,19 +1,11 @@
 (function ($) {
     $(function () {
-
-        $('.button-collapse').sideNav();
-
-    }); // end of document ready
-})(jQuery); // end of jQuery name space
-//---------------------------------------------------------------------------------------
-
-
-
-//---------------------------------------------------------------------------------------
-// Global
-var username = 'Jose Ramon Navarro Marquez';
-var devices = [];
-
+        $('.button-collapse').sideNav({
+                closeOnClick: true // Closes side-nav on <a> clicks, useful for Angular/Meteor
+            }
+        );
+    });
+})(jQuery);
 //---------------------------------------------------------------------------------------
 var app = angular.module('iotApp', ["ngRoute",'chart.js','nvd3']);
 

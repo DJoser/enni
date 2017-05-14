@@ -140,12 +140,12 @@ void overlay_onload(minko::dom::AbstractDOM::Ptr dom, std::string page)
 	btnControlLeft = dom::AbstractDOMElement::Ptr(dom->getElementById("menuControl").get());
 	btnControlLeft->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
 	{
-		tituloPagina->textContent("Control Cliked");
+		//tituloPagina->textContent("Control Cliked");
 	});
 
 	onclickSlot = dom->document()->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
 	{
-		tituloPagina->textContent("Clicked");
+		//tituloPagina->textContent("Clicked");
 	});
 
 	onmessage = dom->onmessage()->connect([=](dom::AbstractDOM::Ptr dom, std::string string) {

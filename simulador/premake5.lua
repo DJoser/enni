@@ -23,5 +23,5 @@ minko.project.solution(PROJECT_NAME)
 		minko.plugin.enable("png")
 
 		minko.package.assets {
-		    ['**'] = { 'copy', 'embed' }
+		    ['**'] = { 'copy'}
 		}
