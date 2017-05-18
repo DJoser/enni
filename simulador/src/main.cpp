@@ -36,8 +36,6 @@ SceneManager::Ptr sceneManager;
 scene::Node::Ptr root = nullptr;
 scene::Node::Ptr plano = nullptr;
 scene::Node::Ptr camera = nullptr;
-
-static int numargs = 0;
 //------------------------------------------------------------------------------------
 // Operadores C Api
 
@@ -50,14 +48,20 @@ static PyObject* enni_zen(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, ":numargs"))
 		return NULL;
 	return PyUnicode_FromString(
-		"1. CORAJE"
-		"Un samurai lleva implícito el coraje; es coraje."
-		"Vive la vida de forma plena, completa, maravillosa."
-		"El coraje heroico no es ciego, es inteligente y fuerte."
-		"El samurai desarrolla el coraje y hace que su cuerpo lo"
-		"sea ejerciendo el control sobre el mismo y reemplazando"
-		"el miedo por el respeto y la precaución."
+		"1. Integridad : Los guerreros se comprometen plenamente con sus decisiones.\n"
+		"2. Respeto : La verdadera fuerza de un guerrero aparece en tiempos de dificultad, ellos no necesitan probar su fuerza.\n"
+		"3. Coraje : El coraje heroico no es ciego, es inteligente y fuerte.\n"
+		"4. Honor : No te puedes esconder de ti mismo.\n"
+		"5. Compasion : Si la oportunidad de mejorar no aparece, sal del camino a buscar una.\n"
+		"6. Sinceridad : Hablar y hacer es la misma accion.\n"
+		"7. Deber y Lealtad	: Los guerreros son responsables de que han dicho y an hecho asi como sus consecuencias.\n"
 	);
+}
+static PyObject* enni_arbol(PyObject *self, PyObject *args)
+{
+	if (!PyArg_ParseTuple(args, ":numargs"))
+		return NULL;
+	return PyUnicode_FromString("arbol");
 }
 //------------------------------------------------------------------------------------
 // pyConfig.h
@@ -218,7 +222,6 @@ void canvas_enterFrame(AbstractCanvas::Ptr canvas, float time, float deltaTime, 
 int main(int argc, char** argv)
 {
 	// Inicializar la interfaz del programa
-	numargs = argc;
 	PyImport_AppendInittab("enni", &PyInit_enni);
 
 	//----------------------------------------------------------------------------------
@@ -266,7 +269,7 @@ int main(int argc, char** argv)
 	// Inciar el programa
 	overlay->load("html/interface.html");
 	defaultLoader->load();
-	defaulLoader_complete(defaultLoader);
+	//defaulLoader_complete(defaultLoader);
 
 	Py_Initialize();
 	canvas->run();

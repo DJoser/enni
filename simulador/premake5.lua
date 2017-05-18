@@ -8,7 +8,6 @@ minko.project.solution(PROJECT_NAME)
 
 		files { "src/**.cpp", "src/**.hpp", "asset/**", "src/**.h" }
 		includedirs { "src" }
-		links {"Setupapi"}
 
 		-- plugin
 		minko.plugin.enable("sdl")
