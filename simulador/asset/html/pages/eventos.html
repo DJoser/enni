@@ -382,6 +382,7 @@
     <category name="Functions" colour="#9A5CA6" custom="PROCEDURE"></category>
 </xml>
 <script>
+
     var mathCategory = '<xml>';
     mathCategory += '  <block type="controls_if"></block>';
     mathCategory += '  <block type="controls_whileUntil"></block>';
@@ -391,6 +392,27 @@
     var blocklyDiv = document.getElementById('blocklyDiv');
     var workspace = Blockly.inject(blocklyDiv,
         {toolbox: document.getElementById('toolbox')});
+    loadBlockly();
+    function loadBlockly()
+    {
+        var xmlText = localStorage.getItem("draft.xml");
+        if (xmlText) {
+            Blockly.mainWorkspace.clear();
+            xmlDom = Blockly.Xml.textToDom(xmlText);
+            Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xmlDom);
+        }
+    }
+    function onWorkspaceChange(event) {
+        if (event.type == Blockly.Events.CHANGE ||
+                event.type == Blockly.Events.CREATE ||
+                event.type == Blockly.Events.DELETE ||
+                event.type == Blockly.Events.MOVE) {
+            var xmlDom  = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+            var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+            localStorage.setItem("draft.xml",xmlText);
+        }
+    }
+    workspace.addChangeListener(onWorkspaceChange);
     var onresize = function(e) {
         // Compute the absolute coordinates and dimensions of blocklyArea.
         var element = blocklyArea;
