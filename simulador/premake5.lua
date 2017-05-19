@@ -16,7 +16,7 @@ end
 
 files { "src/**.cpp", "src/**.hpp", "asset/**", "src/**.h" }
 includedirs { "src" , PYTHON_HOME .. '/include'}
-libdirs { PYTHON_HOME .. '../libs' }
+libdirs { PYTHON_HOME .. '/libs' }
 
 -- plugin
 minko.plugin.enable("sdl")
