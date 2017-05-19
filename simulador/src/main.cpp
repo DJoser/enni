@@ -1,35 +1,9 @@
-#include "minko/Minko.hpp"
-#include "minko/MinkoSDL.hpp"
-#include "minko/MinkoHtmlOverlay.hpp"
-#include "minko/MinkoBullet.hpp"
-#include "minko/MinkoASSIMP.hpp"
-#include "minko/MinkoJPEG.hpp"
-#include "minko/MinkoPNG.hpp"
+#include "enni.h"
 
-#include "Python.h"
-
-using namespace minko;
-using namespace minko::component;
-using namespace minko::component::bullet;
-
-// Constantes
-CONST std::string TITULO_VENTANA = "E.N.N.I.";
-
-// Interfaz Grafica
-dom::AbstractDOM::Ptr gameInterfaceDom;
-dom::AbstractDOMElement::Ptr tituloPagina;
-dom::AbstractDOMElement::Ptr objectTree;
-dom::AbstractDOMElement::Ptr objectProperty;
-dom::AbstractDOMElement::Ptr btnControlLeft;
-
-// Eventos interfaz
-Signal<minko::dom::AbstractDOM::Ptr, std::string>::Slot onloadSlot;
-Signal<minko::dom::AbstractDOMMouseEvent::Ptr>::Slot onclickSlot;
-Signal<dom::AbstractDOM::Ptr, std::string>::Slot onmessage;
 //------------------------------------------------------------------------------------
 // Data
 Canvas::Ptr canvas;
-HtmlOverlay::Ptr overlay;
+
 PhysicsWorld::Ptr world;
 SceneManager::Ptr sceneManager;
 scene::Node::Ptr root = nullptr;
@@ -88,50 +62,8 @@ void scene_load_model();
 
 void input_map_key();
 
-void html_map_event();
-void html_send_mesage();
-void html_load_page() {
-	overlay->load("html/interface.html");
-}
-
 void assets_find();
-//------------------------------------------------------------------------------------
-// Operadores Python Apy
-static PyObject* enni_zen(PyObject *self, PyObject *args)
-{
-	if (!PyArg_ParseTuple(args, ":numargs"))
-		return NULL;
-	return PyUnicode_FromString(
-		"1. Integridad : Los guerreros se comprometen plenamente con sus decisiones.\n"
-		"2. Respeto : La verdadera fuerza de un guerrero aparece en tiempos de dificultad, ellos no necesitan probar su fuerza.\n"
-		"3. Coraje : El coraje heroico no es ciego, es inteligente y fuerte.\n"
-		"4. Honor : No te puedes esconder de ti mismo.\n"
-		"5. Compasion : Si la oportunidad de mejorar no aparece, sal del camino a buscar una.\n"
-		"6. Sinceridad : Hablar y hacer es la misma accion.\n"
-		"7. Deber y Lealtad	: Los guerreros son responsables de que han dicho y an hecho asi como sus consecuencias.\n"
-	);
-}
-static PyObject* enni_arbol(PyObject *self, PyObject *args)
-{
-	if (!PyArg_ParseTuple(args, ":numargs"))
-		return NULL;
-	return PyUnicode_FromString("arbol");
-}
-//------------------------------------------------------------------------------------
-// enni py API
-static PyMethodDef EnniMethods[] = {
-	{ "zen", enni_zen, METH_VARARGS, "Retorna el Zen de E.N.N.I." },
-	{ NULL, NULL, 0, NULL }
-};
 
-static PyModuleDef EnniModule = {
-	PyModuleDef_HEAD_INIT, "enni", NULL, -1, EnniMethods,NULL, NULL, NULL, NULL
-};
-
-static PyObject* PyInit_enni(void)
-{
-	return PyModule_Create(&EnniModule);
-}
 //------------------------------------------------------------------------------------
 void defaulLoader_complete(file::Loader::Ptr loader)
 {
@@ -148,8 +80,6 @@ void defaulLoader_complete(file::Loader::Ptr loader)
 			)))
 		->addComponent(Camera::create(math::perspective(.785f, canvas->aspectRatio(), 0.1f, 1000.f)));
 	root->addChild(camera);
-
-	
 }
 
 void overlay_onload(minko::dom::AbstractDOM::Ptr dom, std::string page)
@@ -294,6 +224,17 @@ int main(int argc, char** argv)
 	defaultLoader->load();
 
 	Py_Initialize();
+
+	size_t size;
+	auto programName = std::string("enni_init");
+	Py_SetProgramName(Py_DecodeLocale(programName.c_str(), &size));
+	PyRun_SimpleString(
+		"import enni\n"
+		"print(enni.zen())\n"
+		"n = enni.Noddy()\n"
+		"print(n)\n"
+		"help(n)\n"
+	);
 	canvas->run();
 	if(Py_FinalizeEx() < 0) exit(120);
 
