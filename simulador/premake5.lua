@@ -4,23 +4,32 @@ PROJECT_NAME = path.getname(os.getcwd())
 
 minko.project.solution(PROJECT_NAME)
 
-	minko.project.application(PROJECT_NAME)
+minko.project.application(PROJECT_NAME)
 
-		files { "src/**.cpp", "src/**.hpp", "asset/**", "src/**.h" }
-		includedirs { "src" }
+if not PYTHON_HOME then
+	if os.getenv('PYTHON_HOME') then
+		PYTHON_HOME = path.translate(os.getenv('PYTHON_HOME'), '/')
+	else
+		error('You must define the environment variable PYTHON_HOME.\n')
+	end
+end
 
-		-- plugin
-		minko.plugin.enable("sdl")
-		minko.plugin.enable("bullet")
-		--minko.plugin.enable("jpeg")
-		--minko.plugin.enable("serializer")
-		--minko.plugin.enable("particles")
-		--minko.plugin.enable("png")
-		minko.plugin.enable("html-overlay")
-		minko.plugin.enable("assimp")
-		minko.plugin.enable("jpeg")
-		minko.plugin.enable("png")
+files { "src/**.cpp", "src/**.hpp", "asset/**", "src/**.h" }
+includedirs { "src" , PYTHON_HOME .. '/include'}
+libdirs { PYTHON_HOME .. '../libs' }
 
-		minko.package.assets {
-		    ['**'] = { 'copy'}
-		}
+-- plugin
+minko.plugin.enable("sdl")
+minko.plugin.enable("bullet")
+--minko.plugin.enable("jpeg")
+--minko.plugin.enable("serializer")
+--minko.plugin.enable("particles")
+--minko.plugin.enable("png")
+minko.plugin.enable("html-overlay")
+minko.plugin.enable("assimp")
+minko.plugin.enable("jpeg")
+minko.plugin.enable("png")
+
+minko.package.assets {
+    ['**'] = { 'copy'}
+}
