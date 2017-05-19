@@ -5,6 +5,7 @@
 #include "minko/MinkoASSIMP.hpp"
 #include "minko/MinkoJPEG.hpp"
 #include "minko/MinkoPNG.hpp"
+
 #include "Python.h"
 
 using namespace minko;
@@ -28,19 +29,72 @@ Signal<dom::AbstractDOM::Ptr, std::string>::Slot onmessage;
 //------------------------------------------------------------------------------------
 // Data
 Canvas::Ptr canvas;
-
 HtmlOverlay::Ptr overlay;
 PhysicsWorld::Ptr world;
 SceneManager::Ptr sceneManager;
-
 scene::Node::Ptr root = nullptr;
-scene::Node::Ptr plano = nullptr;
 scene::Node::Ptr camera = nullptr;
 //------------------------------------------------------------------------------------
 // Operadores C Api
+void app_default_script();
 
-// Cargar Robot
+void camera_rotar();
+void camera_zoom();
+void camera_move();
 
+void world_load_model();
+void world_play();
+void world_pause();
+void world_set_gravity();
+void world_show_debug_data();
+
+void scene_load_plane(std::string name) {
+	// Crear el plano de simulacion
+	float GROUND_WIDTH = 5.f;
+	float GROUND_DEPTH = 5.f;
+	float GROUND_THICK = 0.1f;
+	auto planoMatrix = math::scale(math::vec3(GROUND_WIDTH, GROUND_THICK, GROUND_DEPTH)) * math::mat4();
+	auto plano = scene::Node::create("plano")
+		->addComponent(Transform::create(planoMatrix))
+		->addComponent(Surface::create(
+			geometry::CubeGeometry::create(sceneManager->assets()->context()),
+			material::Material::create()
+			->set({{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }}),
+			sceneManager->assets()->effect("effect/Phong.effect")
+		))
+		->addComponent(bullet::Collider::create(
+			bullet::ColliderData::create(
+				0.f, // static object (no mass)
+				bullet::BoxShape::create(GROUND_WIDTH * 0.5f, GROUND_THICK * 0.5f, GROUND_DEPTH * 0.5f)
+			)
+		))
+		->addComponent(bullet::ColliderDebug::create(sceneManager->assets()));
+	root->addChild(plano);
+}
+void scene_add_ligth() {
+	// Agregar Luces
+	auto lights = scene::Node::create("lights")
+		->addComponent(DirectionalLight::create())
+		->addComponent(AmbientLight::create())
+		->addComponent(Transform::create(math::inverse(math::lookAt(
+			math::vec3(0.f, 2.f, 5.f),
+			math::vec3(0.f, 0.f, 0.f),
+			math::vec3(0.f, 1.f, 0.f)
+		))));
+	root->addChild(lights);
+}
+void scene_remove_element();
+void scene_load_model();
+
+void input_map_key();
+
+void html_map_event();
+void html_send_mesage();
+void html_load_page() {
+	overlay->load("html/interface.html");
+}
+
+void assets_find();
 //------------------------------------------------------------------------------------
 // Operadores Python Apy
 static PyObject* enni_zen(PyObject *self, PyObject *args)
@@ -64,7 +118,7 @@ static PyObject* enni_arbol(PyObject *self, PyObject *args)
 	return PyUnicode_FromString("arbol");
 }
 //------------------------------------------------------------------------------------
-// pyConfig.h
+// enni py API
 static PyMethodDef EnniMethods[] = {
 	{ "zen", enni_zen, METH_VARARGS, "Retorna el Zen de E.N.N.I." },
 	{ NULL, NULL, 0, NULL }
@@ -86,29 +140,6 @@ void defaulLoader_complete(file::Loader::Ptr loader)
 		sceneManager->assets()->effect("effect/Phong.effect")
 	);
 
-	// Crear el plano de simulacion
-	float GROUND_WIDTH = 5.f;
-	float GROUND_DEPTH = 5.f;
-	float GROUND_THICK = 0.1f;
-	auto planoMatrix = math::scale(math::vec3(GROUND_WIDTH, GROUND_THICK, GROUND_DEPTH)) * math::mat4();
-	plano = scene::Node::create("plano")
-		->addComponent(Transform::create(planoMatrix))
-		->addComponent(Surface::create(
-			geometry::CubeGeometry::create(sceneManager->assets()->context()),
-			material::Material::create()->set({
-				{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
-	}),
-			sceneManager->assets()->effect("effect/Phong.effect")
-		))
-		->addComponent(bullet::Collider::create(
-			bullet::ColliderData::create(
-				0.f, // static object (no mass)
-				bullet::BoxShape::create(GROUND_WIDTH * 0.5f, GROUND_THICK * 0.5f, GROUND_DEPTH * 0.5f)
-			)
-		))
-		->addComponent(bullet::ColliderDebug::create(sceneManager->assets()));
-	root->addChild(plano);
-
 	// Agregar Camara
 	camera = scene::Node::create("camera")
 		->addComponent(Renderer::create(0x7f7f7fff))
@@ -118,16 +149,7 @@ void defaulLoader_complete(file::Loader::Ptr loader)
 		->addComponent(Camera::create(math::perspective(.785f, canvas->aspectRatio(), 0.1f, 1000.f)));
 	root->addChild(camera);
 
-	// Agregar Camara
-	auto lights = scene::Node::create("lights")
-		->addComponent(DirectionalLight::create())
-		->addComponent(AmbientLight::create())
-		->addComponent(Transform::create(math::inverse(math::lookAt(
-			math::vec3(0.f, 2.f, 5.f),
-			math::vec3(0.f, 0.f, 0.f),
-			math::vec3(0.f, 1.f, 0.f)
-		))));
-	root->addChild(lights);
+	
 }
 
 void overlay_onload(minko::dom::AbstractDOM::Ptr dom, std::string page)
@@ -199,7 +221,6 @@ void keyboard_keyDown(input::Keyboard::Ptr k) {
 
 		Py_SetProgramName(Py_DecodeLocale(programName.c_str(), &size));
 
-
 		PyRun_SimpleString(
 			"from time import time,ctime\n"
 			"print('Today is', ctime(time()))\n"
@@ -218,20 +239,23 @@ void canvas_enterFrame(AbstractCanvas::Ptr canvas, float time, float deltaTime, 
 {
 	sceneManager->nextFrame(time, deltaTime);
 };
-//------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
+	//---------------------------------------------------------------------------------
 	// Inicializar la interfaz del programa
 	PyImport_AppendInittab("enni", &PyInit_enni);
 
-	//----------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------
 	// Interfaz grafica HTML
 	overlay = HtmlOverlay::create(argc, argv);
 
+	//---------------------------------------------------------------------------------
 	// Simulador Fisica (Bullet)
 	world = bullet::PhysicsWorld::create();
 	world->paused(true);
 
+	//---------------------------------------------------------------------------------
 	// Canvas de dibujo
 	canvas = Canvas::create(TITULO_VENTANA, 960, 540);
 	sceneManager = SceneManager::create(canvas);
@@ -267,9 +291,7 @@ int main(int argc, char** argv)
 	auto d = canvas->enterFrame()->connect(canvas_enterFrame);
 
 	// Inciar el programa
-	overlay->load("html/interface.html");
 	defaultLoader->load();
-	//defaulLoader_complete(defaultLoader);
 
 	Py_Initialize();
 	canvas->run();
