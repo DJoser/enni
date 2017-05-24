@@ -40,7 +40,16 @@ scene::Node::Ptr camera = nullptr;
 // Operadores C Api
 
 // Cargar Robot
+const std::string ROBOT = std::string("asset/robot/Tyson/tyson.dae");
+// Root
+scene::Node::Ptr Rob = nullptr;
 
+// Partes
+scene::Node::Ptr Base = nullptr;
+scene::Node::Ptr Cabeza = nullptr;
+scene::Node::Ptr Extensor = nullptr;
+scene::Node::Ptr Piso = nullptr;
+scene::Node::Ptr Rotor = nullptr;
 //------------------------------------------------------------------------------------
 // Operadores Python Apy
 static PyObject* enni_zen(PyObject *self, PyObject *args)
@@ -128,6 +137,23 @@ void defaulLoader_complete(file::Loader::Ptr loader)
 			math::vec3(0.f, 1.f, 0.f)
 		))));
 	root->addChild(lights);
+
+
+	auto Rob = sceneManager->assets()->symbol(ROBOT);
+
+	for (auto node : Rob->children())
+	{
+		std::string nombre = node->name();
+
+		if (nombre == "Base") { Base = node; }
+		if (nombre == "Cabeza") { Cabeza = node; }
+		if (nombre == "Extensor") { Extensor = node; }
+		if (nombre == "Piso") { Piso = node; }
+		if (nombre == "Rotor") { Rotor = node; }
+	}
+
+	// Agregar el robot a la simulacion
+	root->addChild(Rob);
 }
 
 void overlay_onload(minko::dom::AbstractDOM::Ptr dom, std::string page)
@@ -258,7 +284,7 @@ int main(int argc, char** argv)
 		->queue("effect/Line.effect")
 		->queue("effect/Phong.effect")
 		->queue("effect/Basic.effect")
-		->queue("asset/robot/Tyson/tyson.dae");
+		->queue(ROBOT);
 
 	// Conectar eventos
 	auto a = overlay->onload()->connect(overlay_onload);
