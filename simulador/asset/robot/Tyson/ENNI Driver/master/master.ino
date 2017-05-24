@@ -41,7 +41,7 @@ e.g. SLAVE_X MOVE_TO_POS 1800
 
 created 19 May 2017
 modified 19 May 2017
-by Alfredo Pizaña
+by Alfredo Pizaï¿½a
 based on Tom Igoe "Two Port Receive"
 
 */
@@ -133,7 +133,7 @@ void serialEvent() {
 		inputString += inChar;
 		// if the incoming character is a newline, set a flag
 		// so the main loop can do something about it:
-		if (inChar == '\n') {
+		if (inChar == ';') {
 			stringComplete = true;
 		}
 
@@ -184,34 +184,41 @@ void evaluateCommand(String cCommand[], int iMaxParams) {
 	if (cCommand[0].equals("MASTER")) {
 
 	}
-	else if (cCommand[0].equals("SLAVE_X")) {
+	else if (cCommand[0].equals("BRAZO")) {
 
-		SlaveX.write(slaveCommand.concat('\n'));
+		SlaveX.write(slaveCommand.concat(' '));
 		SlaveX.listen();
 		String callback = "";
 		if (SlaveX.available()) {
 			callback = SlaveX.readString();
+      Serial.println(callback);
 		}
 
 	}
-	else if (cCommand[0].equals("SLAVE_Y")) {
-		SlaveY.write(slaveCommand.concat('\n'));
+	else if (cCommand[0].equals("BASE")) {
+		SlaveY.write(slaveCommand.concat(' '));
+    Serial.println("command: ");
+    Serial.println(slaveCommand);
 		SlaveY.listen();
 		String callback = "";
 		if (SlaveY.available()) {
 			callback = SlaveY.readString();
+     Serial.println(callback);
 		}
 	}
-	else if (cCommand[0].equals("SLAVE_Z")) {
-		SlaveZ.write(slaveCommand.concat('\n'));
+	else if (cCommand[0].equals("ALTURA")) {
+		SlaveZ.write(slaveCommand.concat(' '));
 		SlaveZ.listen();
 		String callback = "";
 		if (SlaveZ.available()) {
 			callback = SlaveZ.readString();
+     Serial.println(callback);
 		}
 
 	}
 	else {
 		Serial.println("The command was not recognized!!");
 	}
+
+ 
 }
