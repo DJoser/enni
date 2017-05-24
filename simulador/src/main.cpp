@@ -257,8 +257,8 @@ int main(int argc, char** argv)
 	defaultLoader
 		->queue("effect/Line.effect")
 		->queue("effect/Phong.effect")
-		->queue("effect/Basic.effect");
-	//->queue("robot/tyson.dae")
+		->queue("effect/Basic.effect")
+		->queue("asset/robot/Tyson/tyson.dae");
 
 	// Conectar eventos
 	auto a = overlay->onload()->connect(overlay_onload);
