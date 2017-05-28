@@ -2,7 +2,6 @@
 // Data
 Canvas::Ptr canvas;
 
-PhysicsWorld::Ptr world;
 SceneManager::Ptr sceneManager;
 scene::Node::Ptr root = nullptr;
 scene::Node::Ptr camera = nullptr;
@@ -26,12 +25,6 @@ void app_default_script();
 void camera_rotar();
 void camera_zoom();
 void camera_move();
-
-void world_load_model();
-void world_play();
-void world_pause();
-void world_set_gravity();
-void world_show_debug_data();
 
 void scene_load_plane(std::string name) {
 	// Crear el plano de simulacion

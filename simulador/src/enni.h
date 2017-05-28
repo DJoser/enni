@@ -2,6 +2,7 @@
 #include "common.h"
 #include "noddy_module.h"
 #include "html_module_.h"
+#include "physics_module.h"
 
 static PyObject* enni_zen(PyObject *self, PyObject *args)
 {
@@ -33,6 +34,8 @@ PyMODINIT_FUNC PyInit_enni(void)
 		return NULL;
 	if (PyType_Ready(&HtmlType) < 0)
 		return NULL;
+	if (PyType_Ready(&PhysicsType) < 0)
+		return NULL;
 
 	m = PyModule_Create(&EnniModule);
 	if (m == NULL)
@@ -43,5 +46,8 @@ PyMODINIT_FUNC PyInit_enni(void)
 
 	Py_INCREF(&HtmlType);
 	PyModule_AddObject(m, "Html", (PyObject *)&HtmlType);
+
+	Py_INCREF(&PhysicsType);
+	PyModule_AddObject(m, "Physics", (PyObject *)&PhysicsType);
 	return m;
 }
