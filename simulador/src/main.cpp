@@ -1,29 +1,5 @@
 #include "enni.h"
-// Data
-Canvas::Ptr canvas;
-
 //------------------------------------------------------------------------------------
-void defaulLoader_complete(file::Loader::Ptr loader)
-{
-	// Cargar default shader
-	sceneManager->assets()->loader()->options()->effect(
-		sceneManager->assets()->effect("effect/Phong.effect")
-	);
-
-	// Agregar Camara
-	camera = scene::Node::create("camera")
-		->addComponent(Renderer::create(0x7f7f7fff))
-		->addComponent(Transform::create(
-			math::inverse(math::lookAt(math::vec3(5.f, 1.5f, 5.f), math::vec3(), math::vec3(0.f, 1.f, 0.f))
-			)))
-		->addComponent(Camera::create(math::perspective(.785f, canvas->aspectRatio(), 0.1f, 1000.f)));
-	root->addChild(camera);
-
-	scene_add_ligth();
-	scene_load_plane("prueba");
-	scene_load_robot();
-}
-
 void keyboard_keyDown(input::Keyboard::Ptr k) {
 	// Control Camara
 	auto transform = camera->component<Transform>();
