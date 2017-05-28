@@ -30,6 +30,36 @@ void html_load_page(std::string uri) {
 	overlay->load(uri);
 }
 
+//------------------------------------------------------------------------------------------
+// Html eventos
+//------------------------------------------------------------------------------------------
+void overlay_onload(minko::dom::AbstractDOM::Ptr dom, std::string page)
+{
+	if (!dom->isMain())
+		return;
+
+	// Objetos del simulador
+	//gameInterfaceDom = dom;
+	tituloPagina = dom::AbstractDOMElement::Ptr(dom->getElementById("logo-container").get());
+	objectTree = dom::AbstractDOMElement::Ptr(dom->getElementById("objectTree").get());
+	objectProperty = dom::AbstractDOMElement::Ptr(dom->getElementById("objectProperty").get());
+
+	btnControlLeft = dom::AbstractDOMElement::Ptr(dom->getElementById("menuControl").get());
+	btnControlLeft->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
+	{
+		//tituloPagina->textContent("Control Cliked");
+	});
+
+	onclickSlot = dom->document()->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
+	{
+		//tituloPagina->textContent("Clicked");
+	});
+
+	onmessage = dom->onmessage()->connect([=](dom::AbstractDOM::Ptr dom, std::string string) {
+		std::cout << "Ejecutar codigo: " << std::endl << string << std::endl;
+		PyRun_SimpleString(string.c_str());
+	});
+}
 
 //------------------------------------------------------------------------------------------
 // Py Html Module
