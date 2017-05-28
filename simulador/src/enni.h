@@ -1,5 +1,6 @@
 #pragma once
 #include "common.h"
+#include "noddy_module.h"
 #include "html_module_.h"
 
 static PyObject* enni_zen(PyObject *self, PyObject *args)
@@ -21,7 +22,7 @@ static PyMethodDef EnniMethods[] = {
 	{ NULL, NULL, 0, NULL }
 };
 static PyModuleDef EnniModule = {
-	PyModuleDef_HEAD_INIT, "enni", "Example module that creates an extension type.", -1, EnniMethods,NULL, NULL, NULL, NULL
+	PyModuleDef_HEAD_INIT, "enni", "API de E.N.N.I.", -1, EnniMethods,NULL, NULL, NULL, NULL
 };
 
 PyMODINIT_FUNC PyInit_enni(void)
@@ -30,6 +31,8 @@ PyMODINIT_FUNC PyInit_enni(void)
 
 	if (PyType_Ready(&NoddyType) < 0)
 		return NULL;
+	if (PyType_Ready(&HtmlType) < 0)
+		return NULL;
 
 	m = PyModule_Create(&EnniModule);
 	if (m == NULL)
@@ -37,5 +40,8 @@ PyMODINIT_FUNC PyInit_enni(void)
 
 	Py_INCREF(&NoddyType);
 	PyModule_AddObject(m, "Noddy", (PyObject *)&NoddyType);
+
+	Py_INCREF(&HtmlType);
+	PyModule_AddObject(m, "Html", (PyObject *)&HtmlType);
 	return m;
 }

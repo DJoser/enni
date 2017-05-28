@@ -1,6 +1,4 @@
 #include "enni.h"
-
-//------------------------------------------------------------------------------------
 // Data
 Canvas::Ptr canvas;
 
@@ -114,7 +112,7 @@ void defaulLoader_complete(file::Loader::Ptr loader)
 	scene_add_ligth();
 	scene_load_plane("prueba");
 	scene_load_robot();
-	html_load_page("prueba");
+	//html_load_page("prueba");
 
 }
 
@@ -270,6 +268,11 @@ int main(int argc, char** argv)
 		"n = enni.Noddy()\n"
 		"print(n)\n"
 		"help(n)\n"
+
+		"m = enni.Html()\n"
+		"print(m)\n"
+		"help(m)\n"
+		"print(m.loadPage('html/interface.html'))\n"
 	);
 	canvas->run();
 	if(Py_FinalizeEx() < 0) exit(120);
