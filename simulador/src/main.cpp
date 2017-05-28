@@ -112,8 +112,6 @@ void defaulLoader_complete(file::Loader::Ptr loader)
 	scene_add_ligth();
 	scene_load_plane("prueba");
 	scene_load_robot();
-	//html_load_page("prueba");
-
 }
 
 void overlay_onload(minko::dom::AbstractDOM::Ptr dom, std::string page)
@@ -262,18 +260,10 @@ int main(int argc, char** argv)
 	size_t size;
 	auto programName = std::string("enni_init");
 	Py_SetProgramName(Py_DecodeLocale(programName.c_str(), &size));
-	PyRun_SimpleString(
-		"import enni\n"
-		"print(enni.zen())\n"
-		"n = enni.Noddy()\n"
-		"print(n)\n"
-		"help(n)\n"
 
-		"m = enni.Html()\n"
-		"print(m)\n"
-		"help(m)\n"
-		"print(m.loadPage('html/interface.html'))\n"
-	);
+	FILE* file;
+	file = fopen("./asset/config/init.py", "r");
+	PyRun_SimpleFile(file, "./config/init.py");
 	canvas->run();
 	if(Py_FinalizeEx() < 0) exit(120);
 
