@@ -1,65 +1,9 @@
 #include "enni.h"
-//------------------------------------------------------------------------------------
-void keyboard_keyDown(input::Keyboard::Ptr k) {
-	// Control Camara
-	auto transform = camera->component<Transform>();
-	if (k->keyIsDown(input::Keyboard::A)) {
-		transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::D)) {
-		transform->matrix(translate(math::vec3(.1f, 0.f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::DOWN)) {
-		transform->matrix(translate(math::vec3(0.f, -.1f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::UP)) {
-		transform->matrix(translate(math::vec3(0.f, .1f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::W)) {
-		transform->matrix(translate(math::vec3(0.f, 0.f, -.1f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::S)) {
-		transform->matrix(translate(math::vec3(0.f, 0.f, .1f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::ESCAPE)) {
-		canvas->quit();
-	}
-	if (k->keyIsDown(input::Keyboard::M)) {
-		world->paused(false);
-	}
-
-	// Cambio de robot
-	if (k->keyIsDown(input::Keyboard::M)) {
-		tituloPagina->textContent(TITULO_VENTANA + " : Real");
-	}
-	if (k->keyIsDown(input::Keyboard::N)) {
-		tituloPagina->textContent(TITULO_VENTANA + " : Virtual");
-	}
-	if (k->keyIsDown(input::Keyboard::Y)) {
-		auto programName  = std::string("Py_Keyboard");
-		size_t size;
-
-		Py_SetProgramName(Py_DecodeLocale(programName.c_str(), &size));
-
-		PyRun_SimpleString(
-			"from time import time,ctime\n"
-			"print('Today is', ctime(time()))\n"
-		);
-		std::cout << Py_EncodeLocale(Py_GetPath(),&size) << std::endl;
-	}
-	if (k->keyIsDown(input::Keyboard::U)) {
-		PyRun_SimpleString(
-			"import enni\n"
-			"print(enni.zen())"
-		);
-	}
-}
 
 void canvas_enterFrame(AbstractCanvas::Ptr canvas, float time, float deltaTime, bool visible)
 {
 	sceneManager->nextFrame(time, deltaTime);
 };
-//--------------------------------------------------------------------------------------------
 int main(int argc, char** argv)
 {
 	//---------------------------------------------------------------------------------

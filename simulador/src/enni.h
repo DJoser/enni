@@ -5,6 +5,7 @@
 #include "html_module_.h"
 #include "physics_module.h"
 #include "assets_module.h"
+#include "input_module.h"
 
 static PyObject* enni_zen(PyObject *self, PyObject *args)
 {
@@ -42,6 +43,8 @@ PyMODINIT_FUNC PyInit_enni(void)
 		return NULL;
 	if (PyType_Ready(&AssetsType) < 0)
 		return NULL;
+	if (PyType_Ready(&InputType) < 0)
+		return NULL;
 
 	m = PyModule_Create(&EnniModule);
 	if (m == NULL)
@@ -61,6 +64,9 @@ PyMODINIT_FUNC PyInit_enni(void)
 
 	Py_INCREF(&AssetsType);
 	PyModule_AddObject(m, "Assets", (PyObject *)&AssetsType);
+
+	Py_INCREF(&InputType);
+	PyModule_AddObject(m, "Input", (PyObject *)&InputType);
 
 	return m;
 }
