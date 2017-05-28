@@ -26,7 +26,6 @@ void html_send_mesage() {
 
 }
 void html_load_page(std::string uri) {
-	//overlay->load("html/interface.html");
 	overlay->load(uri);
 }
 
