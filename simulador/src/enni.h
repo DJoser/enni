@@ -1,6 +1,7 @@
 #pragma once
 #include "common.h"
 #include "noddy_module.h"
+#include "scene_module.h"
 #include "html_module_.h"
 #include "physics_module.h"
 
@@ -36,6 +37,8 @@ PyMODINIT_FUNC PyInit_enni(void)
 		return NULL;
 	if (PyType_Ready(&PhysicsType) < 0)
 		return NULL;
+	if (PyType_Ready(&SceneType) < 0)
+		return NULL;
 
 	m = PyModule_Create(&EnniModule);
 	if (m == NULL)
@@ -49,5 +52,8 @@ PyMODINIT_FUNC PyInit_enni(void)
 
 	Py_INCREF(&PhysicsType);
 	PyModule_AddObject(m, "Physics", (PyObject *)&PhysicsType);
+
+	Py_INCREF(&SceneType);
+	PyModule_AddObject(m, "Scene", (PyObject *)&SceneType);
 	return m;
 }
