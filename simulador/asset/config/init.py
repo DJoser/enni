@@ -1,3 +1,4 @@
 import enni
 
-enni.html.load('http://google.com')
+h = enni.Html()
+h.loadPage('html/interface.html')

@@ -1,78 +1,50 @@
 #pragma once
 #include "common.h"
 //------------------------------------------------------------------------------------------
-// HTML Data
+// Assets Data
 //------------------------------------------------------------------------------------------
-HtmlOverlay::Ptr overlay;
 
-// Interfaz Grafica
-dom::AbstractDOM::Ptr gameInterfaceDom;
-dom::AbstractDOMElement::Ptr tituloPagina;
-dom::AbstractDOMElement::Ptr objectTree;
-dom::AbstractDOMElement::Ptr objectProperty;
-dom::AbstractDOMElement::Ptr btnControlLeft;
-
-// Eventos interfaz
-Signal<minko::dom::AbstractDOM::Ptr, std::string>::Slot onloadSlot;
-Signal<minko::dom::AbstractDOMMouseEvent::Ptr>::Slot onclickSlot;
-Signal<dom::AbstractDOM::Ptr, std::string>::Slot onmessage;
 
 //------------------------------------------------------------------------------------------
-// C API Html
+// C API Assets
 //------------------------------------------------------------------------------------------
-void html_map_event() {
 
-}
-void html_send_mesage() {
-
-}
-void html_load_page(std::string uri) {
-	overlay->load(uri);
-}
 
 //------------------------------------------------------------------------------------------
-// Html eventos
+// Assets eventos
 //------------------------------------------------------------------------------------------
-void overlay_onload(minko::dom::AbstractDOM::Ptr dom, std::string page)
+void defaulLoader_complete(file::Loader::Ptr loader)
 {
-	if (!dom->isMain())
-		return;
+	// Cargar default shader
+	sceneManager->assets()->loader()->options()->effect(
+		sceneManager->assets()->effect("effect/Phong.effect")
+	);
 
-	// Objetos del simulador
-	//gameInterfaceDom = dom;
-	tituloPagina = dom::AbstractDOMElement::Ptr(dom->getElementById("logo-container").get());
-	objectTree = dom::AbstractDOMElement::Ptr(dom->getElementById("objectTree").get());
-	objectProperty = dom::AbstractDOMElement::Ptr(dom->getElementById("objectProperty").get());
+	// Agregar Camara
+	camera = scene::Node::create("camera")
+		->addComponent(Renderer::create(0x7f7f7fff))
+		->addComponent(Transform::create(
+			math::inverse(math::lookAt(math::vec3(5.f, 1.5f, 5.f), math::vec3(), math::vec3(0.f, 1.f, 0.f))
+			)))
+		->addComponent(Camera::create(math::perspective(.785f, canvas->aspectRatio(), 0.1f, 1000.f)));
+	root->addChild(camera);
 
-	btnControlLeft = dom::AbstractDOMElement::Ptr(dom->getElementById("menuControl").get());
-	btnControlLeft->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
-	{
-		//tituloPagina->textContent("Control Cliked");
-	});
-
-	onclickSlot = dom->document()->onclick()->connect([=](dom::AbstractDOMMouseEvent::Ptr event)
-	{
-		//tituloPagina->textContent("Clicked");
-	});
-
-	onmessage = dom->onmessage()->connect([=](dom::AbstractDOM::Ptr dom, std::string string) {
-		std::cout << "Ejecutar codigo: " << std::endl << string << std::endl;
-		PyRun_SimpleString(string.c_str());
-	});
+	scene_add_ligth();
+	scene_load_plane("prueba");
+	scene_load_robot();
 }
-
 //------------------------------------------------------------------------------------------
 // Py Html Module
 //------------------------------------------------------------------------------------------
 typedef struct {
 	PyObject_HEAD
-	PyObject *first; /* first name */
+		PyObject *first; /* first name */
 	PyObject *last;  /* last name */
 	int number;
-} Html;
+} Assets;
 
 static void
-Html_dealloc(Html* self)
+Assets_dealloc(Assets* self)
 {
 	Py_XDECREF(self->first);
 	Py_XDECREF(self->last);
@@ -80,11 +52,11 @@ Html_dealloc(Html* self)
 }
 
 static PyObject *
-Html_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+Assets_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-	Html *self;
+	Assets *self;
 
-	self = (Html *)type->tp_alloc(type, 0);
+	self = (Assets *)type->tp_alloc(type, 0);
 	if (self != NULL) {
 		self->first = PyUnicode_FromString("");
 		if (self->first == NULL) {
@@ -104,7 +76,7 @@ Html_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 	return (PyObject *)self;
 }
 
-static int Html_init(Html *self, PyObject *args, PyObject *kwds)
+static int Assets_init(Assets *self, PyObject *args, PyObject *kwds)
 {
 	PyObject *first = NULL, *last = NULL, *tmp;
 
@@ -133,14 +105,14 @@ static int Html_init(Html *self, PyObject *args, PyObject *kwds)
 }
 
 
-static PyMemberDef Html_members[] = {
-	{ "first", T_OBJECT_EX, offsetof(Html, first), 0,"first name" },
-	{ "last", T_OBJECT_EX, offsetof(Html, last), 0,"last name" },
-	{ "number", T_INT, offsetof(Html, number), 0,"noddy number" },
+static PyMemberDef Assets_members[] = {
+	{ "first", T_OBJECT_EX, offsetof(Assets, first), 0,"first name" },
+	{ "last", T_OBJECT_EX, offsetof(Assets, last), 0,"last name" },
+	{ "number", T_INT, offsetof(Assets, number), 0,"Assets number" },
 	{ NULL }  /* Sentinel */
 };
 
-static PyObject * Html_name(Html* self)
+static PyObject * Assets_name(Assets* self)
 {
 	if (self->first == NULL) {
 		PyErr_SetString(PyExc_AttributeError, "first");
@@ -155,28 +127,17 @@ static PyObject * Html_name(Html* self)
 	return PyUnicode_FromFormat("%S %S", self->first, self->last);
 }
 
-static PyObject* Html_loadPage(PyObject *self, PyObject *args)
-{
-	const char *uri;
-	if (!PyArg_ParseTuple(args, "s", &uri))
-		return NULL;
-
-	html_load_page(std::string(uri));
-	return PyUnicode_FromString("html cargado");
-}
-
-static PyMethodDef Html_methods[] = {
-	{ "name", (PyCFunction)Html_name, METH_NOARGS,"Return the name, combining the first and last name" },
-	{ "loadPage", Html_loadPage, METH_VARARGS,"Load a web page in the front of camera" },
+static PyMethodDef Assets_methods[] = {
+	{ "name", (PyCFunction)Assets_name, METH_NOARGS,"Return the name, combining the first and last name" },
 	{ NULL }  /* Sentinel */
 };
 
-static PyTypeObject HtmlType = {
+static PyTypeObject AssetsType = {
 	PyVarObject_HEAD_INIT(NULL, 0)
-	"enni.Html",             /* tp_name */
-	sizeof(Html),             /* tp_basicsize */
+	"enni.Assets",             /* tp_name */
+	sizeof(Assets),             /* tp_basicsize */
 	0,                         /* tp_itemsize */
-	(destructor)Html_dealloc, /* tp_dealloc */
+	(destructor)Assets_dealloc, /* tp_dealloc */
 	0,                         /* tp_print */
 	0,                         /* tp_getattr */
 	0,                         /* tp_setattr */
@@ -193,22 +154,22 @@ static PyTypeObject HtmlType = {
 	0,                         /* tp_as_buffer */
 	Py_TPFLAGS_DEFAULT |
 	Py_TPFLAGS_BASETYPE,   /* tp_flags */
-	"Html objects",           /* tp_doc */
+	"Assets objects",           /* tp_doc */
 	0,                         /* tp_traverse */
 	0,                         /* tp_clear */
 	0,                         /* tp_richcompare */
 	0,                         /* tp_weaklistoffset */
 	0,                         /* tp_iter */
 	0,                         /* tp_iternext */
-	Html_methods,             /* tp_methods */
-	Html_members,             /* tp_members */
+	Assets_methods,             /* tp_methods */
+	Assets_members,             /* tp_members */
 	0,                         /* tp_getset */
 	0,                         /* tp_base */
 	0,                         /* tp_dict */
 	0,                         /* tp_descr_get */
 	0,                         /* tp_descr_set */
 	0,                         /* tp_dictoffset */
-	(initproc)Html_init,      /* tp_init */
+	(initproc)Assets_init,      /* tp_init */
 	0,                         /* tp_alloc */
-	Html_new,                 /* tp_new */
+	Assets_new,                 /* tp_new */
 };
