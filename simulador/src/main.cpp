@@ -66,6 +66,7 @@ int main(int argc, char** argv)
 	FILE* file;
 	file = fopen("./asset/config/init.py", "r");
 	PyRun_SimpleFile(file, "./config/init.py");
+	fclose(file);
 	canvas->run();
 	if(Py_FinalizeEx() < 0) exit(120);
 
