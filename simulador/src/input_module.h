@@ -47,22 +47,25 @@ void keyboard_keyDown(input::Keyboard::Ptr k) {
 		tituloPagina->textContent(TITULO_VENTANA + " : Virtual");
 	}
 	if (k->keyIsDown(input::Keyboard::Y)) {
-		auto programName = std::string("Py_Keyboard");
-		size_t size;
-
-		Py_SetProgramName(Py_DecodeLocale(programName.c_str(), &size));
-
 		PyRun_SimpleString(
 			"from time import time,ctime\n"
 			"print('Today is', ctime(time()))\n"
 		);
-		std::cout << Py_EncodeLocale(Py_GetPath(), &size) << std::endl;
 	}
-	if (k->keyIsDown(input::Keyboard::U)) {
+	if (k->keyIsDown(input::Keyboard::Z)) {
 		PyRun_SimpleString(
-			"import enni\n"
 			"print(enni.zen())"
 		);
+	}
+	if (k->keyIsDown(input::Keyboard::H)) {
+		size_t size;
+		auto programName = std::string("enni_test");
+		Py_SetProgramName(Py_DecodeLocale(programName.c_str(), &size));
+
+		FILE* file;
+		file = fopen("./asset/config/debug.py", "r");
+		PyRun_SimpleFile(file, "./config/debug.py");
+		fclose(file);
 	}
 }
 //------------------------------------------------------------------------------------------
