@@ -42,27 +42,13 @@ int main(int argc, char** argv)
 		->registerParser<file::PNGParser>("png")
 		->registerParser<file::JPEGParser>("jpg");
 
-	defaultLoader
-		->queue("effect/Line.effect")
-		->queue("effect/Phong.effect")
-		->queue("effect/Basic.effect")
-		->queue(ROBOT);
-
 	// Conectar eventos
 	auto a = overlay->onload()->connect(overlay_onload);
 	auto b = defaultLoader->complete()->connect(defaulLoader_complete);
 	auto c = canvas->keyboard()->keyDown()->connect(keyboard_keyDown);
 	auto d = canvas->enterFrame()->connect(canvas_enterFrame);
 
-	// Inciar el programa
-	defaultLoader->load();
-
 	Py_Initialize();
-
-	size_t size;
-	auto programName = std::string("enni_init");
-	Py_SetProgramName(Py_DecodeLocale(programName.c_str(), &size));
-
 	FILE* file;
 	file = fopen("./asset/config/init.py", "r");
 	PyRun_SimpleFile(file, "./config/init.py");
