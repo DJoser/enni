@@ -3,23 +3,40 @@
 //------------------------------------------------------------------------------------------
 // Scene Data
 //------------------------------------------------------------------------------------------
-SceneManager::Ptr sceneManager;
 scene::Node::Ptr root = nullptr;
-scene::Node::Ptr camera = nullptr;
-
+//------------------------------------------------------------------------------------------
+// Scene Events
+//------------------------------------------------------------------------------------------
+Signal<AbstractCanvas::Ptr, float, float, bool>::Slot enterFrame;
 //------------------------------------------------------------------------------------------
 // C API Scene
 //------------------------------------------------------------------------------------------
-void scene_add_node();
-void scene_remove_node();
+void scene_init(std::string name) {
+	canvas = Canvas::create(name, 960, 540);
+	sceneManager = SceneManager::create(canvas);
+	root = scene::Node::create("root")->addComponent(sceneManager);
 
+	enterFrame = sceneManager->canvas()->enterFrame()->connect([&](AbstractCanvas::Ptr canvas, float time, float deltaTime, bool flag)
+	{
+		sceneManager->nextFrame(time, deltaTime);
+	});
+}
+scene::Node::Ptr scene_create_node(std::string name) {
+	auto node = scene::Node::create(name);
+	node->addComponent(Transform::create());
+	root->addChild(node);
+	return node;
+}
+void scene_next_frame() {
+	canvas->step();
+}
 //------------------------------------------------------------------------------------------
 // Py Scene Module
 //------------------------------------------------------------------------------------------
 typedef struct {
 	PyObject_HEAD
-		PyObject *first; /* first name */
-	PyObject *last;  /* last name */
+	PyObject *first;
+	PyObject *last;
 	int number;
 } Scene;
 
@@ -52,7 +69,7 @@ Scene_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 		self->number = 0;
 	}
-
+	scene_init(TITULO_VENTANA);
 	return (PyObject *)self;
 }
 
@@ -92,23 +109,25 @@ static PyMemberDef Scene_members[] = {
 	{ NULL }  /* Sentinel */
 };
 
-static PyObject * Scene_name(Scene* self)
+static PyObject * Scene_crete_node(Scene* self,PyObject *args)
 {
-	if (self->first == NULL) {
-		PyErr_SetString(PyExc_AttributeError, "first");
+	const char *name;
+	if (!PyArg_ParseTuple(args, "s", &name))
 		return NULL;
-	}
 
-	if (self->last == NULL) {
-		PyErr_SetString(PyExc_AttributeError, "last");
-		return NULL;
-	}
+	scene_create_node(std::string(name));
+	return PyUnicode_FromString(name);
 
-	return PyUnicode_FromFormat("%S %S", self->first, self->last);
+}
+
+static PyObject * Scene_next_frame(Scene* Self) {
+	scene_next_frame();
+	return Py_None;
 }
 
 static PyMethodDef Scene_methods[] = {
-	{ "name", (PyCFunction)Scene_name, METH_NOARGS,"Return the name, combining the first and last name" },
+	{ "createNode", (PyCFunction)Scene_crete_node, METH_VARARGS, "add a new node to the scene" },
+	{ "nextFrame", (PyCFunction)Scene_next_frame, METH_NOARGS, "add a new node to the scene" },
 	{ NULL }  /* Sentinel */
 };
 

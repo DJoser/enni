@@ -12,27 +12,13 @@ dom::AbstractDOMElement::Ptr objectTree;
 dom::AbstractDOMElement::Ptr objectProperty;
 dom::AbstractDOMElement::Ptr btnControlLeft;
 
-// Eventos interfaz
+//------------------------------------------------------------------------------------------
+// Html eventos
+//------------------------------------------------------------------------------------------
 Signal<minko::dom::AbstractDOM::Ptr, std::string>::Slot onloadSlot;
 Signal<minko::dom::AbstractDOMMouseEvent::Ptr>::Slot onclickSlot;
 Signal<dom::AbstractDOM::Ptr, std::string>::Slot onmessage;
 
-//------------------------------------------------------------------------------------------
-// C API Html
-//------------------------------------------------------------------------------------------
-void html_map_event() {
-
-}
-void html_send_mesage() {
-
-}
-void html_load_page(std::string uri) {
-	overlay->load(uri);
-}
-
-//------------------------------------------------------------------------------------------
-// Html eventos
-//------------------------------------------------------------------------------------------
 void overlay_onload(minko::dom::AbstractDOM::Ptr dom, std::string page)
 {
 	if (!dom->isMain())
@@ -59,6 +45,24 @@ void overlay_onload(minko::dom::AbstractDOM::Ptr dom, std::string page)
 		std::cout << "Ejecutar codigo: " << std::endl << string << std::endl;
 		PyRun_SimpleString(string.c_str());
 	});
+}
+//------------------------------------------------------------------------------------------
+// C API Html
+//------------------------------------------------------------------------------------------
+void html_init() {
+	// Html
+	overlay = HtmlOverlay::create(0, nullptr);
+	root->addComponent(overlay);
+	auto a = overlay->onload()->connect(overlay_onload);
+}
+void html_map_event() {
+
+}
+void html_send_mesage() {
+
+}
+void html_load_page(std::string uri) {
+	overlay->load(uri);
 }
 
 //------------------------------------------------------------------------------------------
@@ -100,7 +104,7 @@ Html_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 		self->number = 0;
 	}
-
+	html_init();
 	return (PyObject *)self;
 }
 
@@ -140,21 +144,6 @@ static PyMemberDef Html_members[] = {
 	{ NULL }  /* Sentinel */
 };
 
-static PyObject * Html_name(Html* self)
-{
-	if (self->first == NULL) {
-		PyErr_SetString(PyExc_AttributeError, "first");
-		return NULL;
-	}
-
-	if (self->last == NULL) {
-		PyErr_SetString(PyExc_AttributeError, "last");
-		return NULL;
-	}
-
-	return PyUnicode_FromFormat("%S %S", self->first, self->last);
-}
-
 static PyObject* Html_loadPage(PyObject *self, PyObject *args)
 {
 	const char *uri;
@@ -166,7 +155,6 @@ static PyObject* Html_loadPage(PyObject *self, PyObject *args)
 }
 
 static PyMethodDef Html_methods[] = {
-	{ "name", (PyCFunction)Html_name, METH_NOARGS,"Return the name, combining the first and last name" },
 	{ "loadPage", Html_loadPage, METH_VARARGS,"Load a web page in the front of camera" },
 	{ NULL }  /* Sentinel */
 };
