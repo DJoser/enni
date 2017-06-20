@@ -23,9 +23,6 @@ int main(int argc, char** argv)
 	// Canvas de dibujo
 	canvas = Canvas::create(TITULO_VENTANA, 960, 540);
 	sceneManager = SceneManager::create(canvas);
-	auto assets = sceneManager->assets();
-	auto defaultLoader = sceneManager->assets()->loader();
-	auto defaultOptions = defaultLoader->options();
 	//----------------------------------------------------------------------------------
 	// Nodos
 	root = scene::Node::create("root")
@@ -33,18 +30,8 @@ int main(int argc, char** argv)
 		->addComponent(world)
 		->addComponent(overlay);
 	//----------------------------------------------------------------------------------
-	// Cargar Assets
-	defaultOptions
-		->generateMipmaps(true)
-		->registerParser<file::OBJParser>("obj")
-		->registerParser<file::ColladaParser>("dae")
-		->registerParser<file::BlenderParser>("blend")
-		->registerParser<file::PNGParser>("png")
-		->registerParser<file::JPEGParser>("jpg");
-
 	// Conectar eventos
 	auto a = overlay->onload()->connect(overlay_onload);
-	auto b = defaultLoader->complete()->connect(defaulLoader_complete);
 	auto c = canvas->keyboard()->keyDown()->connect(keyboard_keyDown);
 	auto d = canvas->enterFrame()->connect(canvas_enterFrame);
 
@@ -54,6 +41,7 @@ int main(int argc, char** argv)
 	PyRun_SimpleFile(file, "./config/init.py");
 	fclose(file);
 	canvas->run();
+
 	if(Py_FinalizeEx() < 0) exit(120);
 
 	return EXIT_SUCCESS;
