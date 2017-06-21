@@ -12,26 +12,7 @@
 // Input eventos
 //------------------------------------------------------------------------------------------
 void keyboard_keyDown(input::Keyboard::Ptr k) {
-	// Control Camara
-	auto transform = camera->component<Transform>();
-	if (k->keyIsDown(input::Keyboard::A)) {
-		transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::D)) {
-		transform->matrix(translate(math::vec3(.1f, 0.f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::DOWN)) {
-		transform->matrix(translate(math::vec3(0.f, -.1f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::UP)) {
-		transform->matrix(translate(math::vec3(0.f, .1f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::W)) {
-		transform->matrix(translate(math::vec3(0.f, 0.f, -.1f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::S)) {
-		transform->matrix(translate(math::vec3(0.f, 0.f, .1f)) * transform->matrix());
-	}
+	
 	if (k->keyIsDown(input::Keyboard::ESCAPE)) {
 		canvas->quit();
 	}
