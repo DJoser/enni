@@ -1,4 +1,7 @@
 import enni
+help(enni.Node)
+
+nodo = enni.Node("nodo",[])
 
 ## Inicializar todas las Apis internas de ENNI
 # Nota: Tienen que ser inicializadas en este orden para evitar 
@@ -9,8 +12,7 @@ a = enni.Assets()
 h = enni.Html()
 p = enni.Physics()
 
-
-print("Inicializando codigo")
+#print("Inicializando codigo")
 
 h.loadPage('html/interface.html')
 ################################################################
@@ -22,23 +24,44 @@ robot = "asset/robot/Tyson/tyson.dae"
 a.queue(robot)
 a.load()
 ################################################################
-camera = s.createNode("camera");
-#node_add_camera(camera);
-#node_transform_lookat(camera, math::vec3(5.f, 1.5f, 5.f));
+camera = s.createNode("camera")
+s.nodeAddCamera()
+#camera.modules.add(Camera(5.0f, 1.5f, 5.0f))
 
-light = s.createNode("ligth");
-#node_add_directionalLigth(light);
-#node_transform_lookat(light, math::vec3(0.f, 2.f, 5.f));
+light = s.createNode("light")
+s.nodeAddDirectionaLight()
+##light.modules.add(directionalLigth(0.f, 2.f, 5.f))
 
-cubo = s.createNode("cube");
-#node_add_cube(cubo);
+cubo = s.createNode("cube")
+s.nodeAddCube()
+##cube.modules.add(geometry("cube"))
 
 tyson = s.createNode("tyson")
-#s["tyson"].addModel(robot)
-#s["tyson"].addCollider("cube",0.5,0.5,0.5)
-#s["tyson"].addPhysicsDebug()
+#s.nodeCreateModel()
+##s["tyson"].addModel(robot)
+##s["tyson"].addCollider("cube",0.5,0.5,0.5)
+##s["tyson"].addPhysicsDebug()
 
-piso = s.createNode("piso")
-#s["piso"].addPlane(0.,0.,0.)
-#s["piso"].addCollider("plane",0.,0.,0.)
-#s["piso"].addPhysicsDebug()
+#piso = s.createNode("piso")
+##s["piso"].addPlane(0.,0.,0.)
+##s["piso"].addCollider("plane",0.,0.,0.)
+##s["piso"].addPhysicsDebug()
+
+##class robot:
+##    def __init__(self, *args, **kwargs):
+##        brazo = serial.begin("COM1")
+##        altura = serial.begin("COM2")
+##        base = serial.begin("COM3")
+##        return super().__init__(*args, **kwargs)
+
+##    def rotarBrazo():
+##        if simulado:
+##            tyson.rotate()
+##        else:
+##            serial.print("")
+##    def calibrar():
+##        pass
+##t = robot()
+##t.rotarBrazo()
+
+

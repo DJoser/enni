@@ -31,20 +31,55 @@ void scene_next_frame() {
 	canvas->step();
 }
 //------------------------------------------------------------------------------------------
+void node_add_cube(scene::Node::Ptr node) {
+	node->addComponent(Surface::create(
+		geometry::CubeGeometry::create(sceneManager->assets()->context()),
+		material::Material::create()->set({
+			{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
+	}),
+		sceneManager->assets()->effect("effect/Phong.effect")
+	));
+}
+void node_add_directionalLigth(scene::Node::Ptr node) {
+	node->addComponent(DirectionalLight::create())
+		->addComponent(AmbientLight::create());
+}
+void node_add_camera(scene::Node::Ptr node) {
+	node->addComponent(Renderer::create(0x7f7f7fff))
+		->addComponent(Camera::create(
+			math::perspective(
+				.785f,
+				sceneManager->canvas()->aspectRatio(),
+				0.1f, 1000.f)
+		));
+}
+void node_transform_rotate(scene::Node::Ptr node) {
+	node->component<Transform>()->matrix(
+		node->component<Transform>()->matrix() *
+		math::rotate(.01f, math::vec3(0.f, 1.f, 0.f))
+	);
+}
+void node_transform_lookat(scene::Node::Ptr node, math::vec3 target) {
+	node->component<Transform>()->matrix(
+		math::inverse(math::lookAt(
+			target,
+			math::vec3(0.f, 0.f, 0.f),
+			math::vec3(0.f, 1.f, 0.f)
+		))
+	);
+}
+//------------------------------------------------------------------------------------------
 // Py Scene Module
 //------------------------------------------------------------------------------------------
 typedef struct {
 	PyObject_HEAD
-	PyObject *first;
-	PyObject *last;
-	int number;
+	PyObject *root;
 } Scene;
 
 static void
 Scene_dealloc(Scene* self)
 {
-	Py_XDECREF(self->first);
-	Py_XDECREF(self->last);
+	Py_XDECREF(self->root);
 	Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
@@ -55,19 +90,11 @@ Scene_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 	self = (Scene *)type->tp_alloc(type, 0);
 	if (self != NULL) {
-		self->first = PyUnicode_FromString("");
-		if (self->first == NULL) {
+		self->root = PyUnicode_FromString("");
+		if (self->root == NULL) {
 			Py_DECREF(self);
 			return NULL;
 		}
-
-		self->last = PyUnicode_FromString("");
-		if (self->last == NULL) {
-			Py_DECREF(self);
-			return NULL;
-		}
-
-		self->number = 0;
 	}
 	scene_init(TITULO_VENTANA);
 	return (PyObject *)self;
@@ -75,37 +102,25 @@ Scene_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 static int Scene_init(Scene *self, PyObject *args, PyObject *kwds)
 {
-	PyObject *first = NULL, *last = NULL, *tmp;
+	PyObject *root = NULL, *tmp;
 
 	static char *kwlist[] = { "first", "last", "number", NULL };
 
-	if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OOi", kwlist,
-		&first, &last,
-		&self->number))
+	if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O", kwlist,&root))
 		return -1;
 
-	if (first) {
-		tmp = self->first;
-		Py_INCREF(first);
-		self->first = first;
-		Py_XDECREF(tmp);
-	}
-
-	if (last) {
-		tmp = self->last;
-		Py_INCREF(last);
-		self->last = last;
+	if (root) {
+		tmp = self->root;
+		Py_INCREF(root);
+		self->root = root;
 		Py_XDECREF(tmp);
 	}
 
 	return 0;
 }
 
-
 static PyMemberDef Scene_members[] = {
-	{ "first", T_OBJECT_EX, offsetof(Scene, first), 0,"first name" },
-	{ "last", T_OBJECT_EX, offsetof(Scene, last), 0,"last name" },
-	{ "number", T_INT, offsetof(Scene, number), 0,"Scene number" },
+	{ "root", T_OBJECT_EX, offsetof(Scene, root), 0,"root node in the node tree" },
 	{ NULL }  /* Sentinel */
 };
 
@@ -125,9 +140,60 @@ static PyObject * Scene_next_frame(Scene* Self) {
 	return Py_None;
 }
 
+
+//------------------------------------------------------------------------------------------
+static minko::scene::Node::Ptr findNode(std::string name) {
+	auto nodeset = scene::NodeSet::create(root)->descendants(true)->where([](scene::Node::Ptr node)
+	{
+		return true;
+	});
+
+	for (auto& node : nodeset->nodes()) {
+		if (node->name().compare(name) == 0)
+			return node;
+	}
+
+	return nullptr;
+}
+
+
+// Control de modulos del nodo
+static PyObject *Node_add_cube(Scene* Self,PyObject* args) {
+	node_add_cube(findNode("cube"));
+	return Py_None;
+}
+static PyObject *Node_add_directionalLigth(Scene* Self) {
+	auto light = findNode("light");
+	node_add_directionalLigth(light);
+	node_transform_lookat(light, math::vec3(0.f, 2.f, 5.f));
+	return Py_None;
+}
+static PyObject *Node_add_camera(Scene* Self) {
+	auto camera = findNode("camera");
+	node_add_camera(camera);
+	node_transform_lookat(camera, math::vec3(5.f, 1.5f, 5.f));
+	return Py_None;
+}
+static PyObject *Node_transform_rotate(Scene* Self) {
+	return Py_None;
+}
+static PyObject *Node_transform_lookat(Scene* Self) {
+	return Py_None;
+}
+
+//------------------------------------------------------------------------------------------
+
+
 static PyMethodDef Scene_methods[] = {
 	{ "createNode", (PyCFunction)Scene_crete_node, METH_VARARGS, "add a new node to the scene" },
-	{ "nextFrame", (PyCFunction)Scene_next_frame, METH_NOARGS, "add a new node to the scene" },
+	{ "nextFrame", (PyCFunction)Scene_next_frame, METH_NOARGS, "render the next frame in the scene" },
+
+	{ "nodeAddCube", (PyCFunction)Node_add_cube, METH_NOARGS, "TODO" },
+	{ "nodeAddDirectionaLight", (PyCFunction)Node_add_directionalLigth, METH_NOARGS, "TODO" },
+	{ "nodeAddCamera", (PyCFunction)Node_add_camera, METH_NOARGS, "TODO" },
+	{ "nodeTransformRotate", (PyCFunction)Node_transform_rotate, METH_NOARGS, "TODO" },
+	{ "nodeTransformLookat", (PyCFunction)Node_transform_lookat, METH_NOARGS, "TODO" },
+
 	{ NULL }  /* Sentinel */
 };
 

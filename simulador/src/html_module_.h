@@ -140,7 +140,7 @@ static int Html_init(Html *self, PyObject *args, PyObject *kwds)
 static PyMemberDef Html_members[] = {
 	{ "first", T_OBJECT_EX, offsetof(Html, first), 0,"first name" },
 	{ "last", T_OBJECT_EX, offsetof(Html, last), 0,"last name" },
-	{ "number", T_INT, offsetof(Html, number), 0,"noddy number" },
+	{ "number", T_INT, offsetof(Html, number), 0,"Component number" },
 	{ NULL }  /* Sentinel */
 };
 

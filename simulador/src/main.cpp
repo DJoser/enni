@@ -18,9 +18,8 @@ int main(int argc, char** argv)
 	PyRun_SimpleFile(file, "./config/init.py");
 	fclose(file);
 	
-	
 	// Input
-	auto c = canvas->keyboard()->keyDown()->connect(keyboard_keyDown);
+	//auto c = canvas->keyboard()->keyDown()->connect(keyboard_keyDown);
 	
 	// Canvas Run
 	canvas->run();
