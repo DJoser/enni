@@ -15,7 +15,7 @@ int main(int argc, char** argv)
 	Py_Initialize();
 	FILE* file;
 	file = fopen("./asset/config/init.py", "r");
-	PyRun_SimpleFile(file, "./config/init.py");
+	PyRun_SimpleFile(file, "__main__");
 	fclose(file);
 
 	if(Py_FinalizeEx() < 0) exit(120);

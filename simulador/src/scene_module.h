@@ -31,6 +31,12 @@ void scene_next_frame() {
 	canvas->step();
 }
 //------------------------------------------------------------------------------------------
+void node_add_model(scene::Node::Ptr node,std::string name) {
+	auto model = sceneManager->assets()->symbol(name);
+
+	if(model)
+			node->addChild(model);
+}
 void node_add_cube(scene::Node::Ptr node) {
 	node->addComponent(Surface::create(
 		geometry::CubeGeometry::create(sceneManager->assets()->context()),
@@ -53,10 +59,11 @@ void node_add_camera(scene::Node::Ptr node) {
 				0.1f, 1000.f)
 		));
 }
-void node_transform_rotate(scene::Node::Ptr node) {
+void node_transform_rotate(scene::Node::Ptr node, math::vec3 vector) {
 	node->component<Transform>()->matrix(
 		node->component<Transform>()->matrix() *
-		math::rotate(.01f, math::vec3(0.f, 1.f, 0.f))
+		math::rotate(.01f, vector)
+		//math::rotate(.01f, math::vec3(0.f, 1.f, 0.f))
 	);
 }
 void node_transform_lookat(scene::Node::Ptr node, math::vec3 target) {
@@ -152,7 +159,6 @@ static minko::scene::Node::Ptr findNode(std::string name) {
 		if (node->name().compare(name) == 0)
 			return node;
 	}
-
 	return nullptr;
 }
 
@@ -162,38 +168,66 @@ static PyObject *Node_add_cube(Scene* Self,PyObject* args) {
 	node_add_cube(findNode("cube"));
 	return Py_None;
 }
-static PyObject *Node_add_directionalLigth(Scene* Self) {
-	auto light = findNode("light");
-	node_add_directionalLigth(light);
-	node_transform_lookat(light, math::vec3(0.f, 2.f, 5.f));
-	return Py_None;
-}
-static PyObject *Node_add_camera(Scene* Self) {
-	auto camera = findNode("camera");
-	node_add_camera(camera);
-	node_transform_lookat(camera, math::vec3(5.f, 1.5f, 5.f));
-	return Py_None;
-}
-static PyObject *Node_transform_rotate(Scene* Self) {
-	return Py_None;
-}
-static PyObject *Node_transform_lookat(Scene* Self) {
-	return Py_None;
-}
+static PyObject *Node_add_model(Scene* Self, PyObject* args) {
+	const char* name;
+	const char* model;
 
+	if (!PyArg_ParseTuple(args, "ss", &name, &model))
+		return NULL;
+
+	node_add_model(findNode(std::string(name)), std::string(model));
+	return Py_None;
+}
+static PyObject *Node_add_directionalLigth(Scene* Self, PyObject* Args) {
+	const char* name;
+
+	if (!PyArg_ParseTuple(Args, "s", &name))
+		return NULL;
+
+	node_add_directionalLigth(findNode(std::string(name)));
+	return Py_None;
+}
+static PyObject *Node_add_camera(Scene* Self, PyObject* Args) {
+	const char* name;
+
+	if (!PyArg_ParseTuple(Args, "s", &name))
+		return NULL;
+
+	node_add_camera(findNode(std::string(name)));
+	return Py_None;
+}
+static PyObject *Node_transform_rotate(Scene* Self, PyObject* Args) {
+	const char* name;
+	float x = 0.0f, y = 0.0f, z = 0.0f;
+
+	if (!PyArg_ParseTuple(Args, "sfff", &name, &x, &y, &z))
+		return NULL;
+
+	node_transform_rotate(findNode(std::string(name)), math::vec3(x, y, z));
+	return Py_None;
+}
+static PyObject *Node_transform_lookAt(Scene* Self,PyObject* Args) {
+
+	const char* name;
+	float x=0.0f, y=0.0f, z=0.0f;
+
+	if (!PyArg_ParseTuple(Args, "sfff", &name,&x,&y,&z))
+		return NULL;
+
+	node_transform_lookat(findNode(std::string(name)), math::vec3(x, y, z));
+	return Py_None;
+}
 //------------------------------------------------------------------------------------------
-
-
 static PyMethodDef Scene_methods[] = {
 	{ "createNode", (PyCFunction)Scene_crete_node, METH_VARARGS, "add a new node to the scene" },
 	{ "nextFrame", (PyCFunction)Scene_next_frame, METH_NOARGS, "render the next frame in the scene" },
 
 	{ "nodeAddCube", (PyCFunction)Node_add_cube, METH_NOARGS, "TODO" },
-	{ "nodeAddDirectionaLight", (PyCFunction)Node_add_directionalLigth, METH_NOARGS, "TODO" },
-	{ "nodeAddCamera", (PyCFunction)Node_add_camera, METH_NOARGS, "TODO" },
-	{ "nodeTransformRotate", (PyCFunction)Node_transform_rotate, METH_NOARGS, "TODO" },
-	{ "nodeTransformLookat", (PyCFunction)Node_transform_lookat, METH_NOARGS, "TODO" },
-
+	{ "nodeAddModel", (PyCFunction)Node_add_model, METH_VARARGS, "TODO" },
+	{ "nodeAddDirectionaLight", (PyCFunction)Node_add_directionalLigth, METH_VARARGS, "TODO" },
+	{ "nodeAddCamera", (PyCFunction)Node_add_camera, METH_VARARGS, "TODO" },
+	{ "nodeTransformRotate", (PyCFunction)Node_transform_rotate, METH_VARARGS, "TODO" },
+	{ "nodeTransformLookAt", (PyCFunction)Node_transform_lookAt, METH_VARARGS, "TODO" },
 	{ NULL }  /* Sentinel */
 };
 

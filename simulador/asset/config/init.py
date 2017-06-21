@@ -21,26 +21,28 @@ a.queue("effect/Basic.effect")
 a.load()
 
 # Crear escena basica
-camera = s.createNode("camera")
-s.nodeAddCamera()
-#camera.modules.add(Camera(5.0f, 1.5f, 5.0f))
+camera = "camera"
+s.createNode(camera)
+s.nodeAddCamera(camera)
+s.nodeTransformLookAt(camera,5.0, 1.5, 5.0)
 
-light = s.createNode("light")
-s.nodeAddDirectionaLight()
-##light.modules.add(directionalLigth(0.f, 2.f, 5.f))
+light = "light"
+s.createNode(light)
+s.nodeAddDirectionaLight(light)
+s.nodeTransformLookAt(light,0.0, 2.0, 5.0)
 
 # Buscar los modulos registrados
-#########
-robot = "asset/robot/Tyson/tyson.dae" 
+######### Modulo
+robot = "robot/Tyson/model/tyson.dae" 
 a.queue(robot)
 a.load()
 
-cubo = s.createNode("cube")
-s.nodeAddCube()
-##cube.modules.add(geometry("cube"))
-
+tyson = "tyson"
+s.createNode(tyson)
+s.nodeAddModel(tyson,robot)
 #########
 
 # Ciclo del programa
 while True:
+    s.nodeTransformRotate(tyson, 0.0,0.5,0.0)
     s.nextFrame()
