@@ -1,4 +1,3 @@
-from utils import *
 import enni
 
 nodo = enni.Node("nodo",[])

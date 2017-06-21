@@ -17,12 +17,6 @@ int main(int argc, char** argv)
 	file = fopen("./asset/config/init.py", "r");
 	PyRun_SimpleFile(file, "./config/init.py");
 	fclose(file);
-	
-	// Input
-	//auto c = canvas->keyboard()->keyDown()->connect(keyboard_keyDown);
-	
-	// Canvas Run
-	canvas->run();
 
 	if(Py_FinalizeEx() < 0) exit(120);
 
