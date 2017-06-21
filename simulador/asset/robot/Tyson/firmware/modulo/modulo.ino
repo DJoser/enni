@@ -1,5 +1,5 @@
 //------------------------------------------------------------------- Define Module
-#define MODULE_NAME "BASE :"
+#define MODULE_NAME "BASE\n"
 
 void sendData(char* data){
   Serial.print(MODULE_NAME);
@@ -218,7 +218,7 @@ void setup(){
   Serial.begin(9600);
   while (!Serial) { ; } // wait for serial port to connect. Needed for native USB port only
   Serial.print(MODULE_NAME);
-  Serial.println(" ready :)!");
+  Serial.println("ready :)!");
 }
 
 void loop(){

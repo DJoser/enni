@@ -1,11 +1,12 @@
 #pragma once
 #include "common.h"
-#include "noddy_module.h"
+#include "component_module.h"
 #include "scene_module.h"
 #include "html_module_.h"
 #include "physics_module.h"
 #include "assets_module.h"
 #include "input_module.h"
+#include "node_module.h"
 
 static PyObject* enni_zen(PyObject *self, PyObject *args)
 {
@@ -33,25 +34,27 @@ PyMODINIT_FUNC PyInit_enni(void)
 {
 	PyObject* m;
 
-	if (PyType_Ready(&NoddyType) < 0)
+	if (PyType_Ready(&SceneType) < 0)
+		return NULL;
+	if (PyType_Ready(&ComponentType) < 0)
 		return NULL;
 	if (PyType_Ready(&HtmlType) < 0)
 		return NULL;
 	if (PyType_Ready(&PhysicsType) < 0)
 		return NULL;
-	if (PyType_Ready(&SceneType) < 0)
-		return NULL;
 	if (PyType_Ready(&AssetsType) < 0)
 		return NULL;
 	if (PyType_Ready(&InputType) < 0)
+		return NULL;
+	if (PyType_Ready(&PyNodeType) < 0)
 		return NULL;
 
 	m = PyModule_Create(&EnniModule);
 	if (m == NULL)
 		return NULL;
 
-	Py_INCREF(&NoddyType);
-	PyModule_AddObject(m, "Noddy", (PyObject *)&NoddyType);
+	Py_INCREF(&ComponentType);
+	PyModule_AddObject(m, "Component", (PyObject *)&ComponentType);
 
 	Py_INCREF(&HtmlType);
 	PyModule_AddObject(m, "Html", (PyObject *)&HtmlType);
@@ -67,6 +70,9 @@ PyMODINIT_FUNC PyInit_enni(void)
 
 	Py_INCREF(&InputType);
 	PyModule_AddObject(m, "Input", (PyObject *)&InputType);
+
+	Py_INCREF(&PyNodeType);
+	PyModule_AddObject(m, "Node", (PyObject *)&PyNodeType);
 
 	return m;
 }

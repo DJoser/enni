@@ -3,45 +3,53 @@
 //------------------------------------------------------------------------------------------
 // Assets Data
 //------------------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------------------
-// C API Assets
-//------------------------------------------------------------------------------------------
-
-
+bool loaderComplete = true;
+minko::file::Loader::Ptr loader;
 //------------------------------------------------------------------------------------------
 // Assets eventos
 //------------------------------------------------------------------------------------------
-void defaulLoader_complete(file::Loader::Ptr loader)
-{
-	// Cargar default shader
-	sceneManager->assets()->loader()->options()->effect(
-		sceneManager->assets()->effect("effect/Phong.effect")
-	);
+Signal<file::Loader::Ptr>::Slot  eventLoaderComplete;
+//------------------------------------------------------------------------------------------
+// C API Assets
+//------------------------------------------------------------------------------------------
+void assets_init() {
+	loader = sceneManager->assets()->loader();
+	// Cargar Assets
+	loader->options()
+		->generateMipmaps(true)
+		->registerParser<file::OBJParser>("obj")
+		->registerParser<file::ColladaParser>("dae")
+		->registerParser<file::BlenderParser>("blend")
+		->registerParser<file::PNGParser>("png")
+		->registerParser<file::JPEGParser>("jpg");
 
-	// Agregar Camara
-	camera = scene::Node::create("camera")
-		->addComponent(Renderer::create(0x7f7f7fff))
-		->addComponent(Transform::create(
-			math::inverse(math::lookAt(math::vec3(5.f, 1.5f, 5.f), math::vec3(), math::vec3(0.f, 1.f, 0.f))
-			)))
-		->addComponent(Camera::create(math::perspective(.785f, canvas->aspectRatio(), 0.1f, 1000.f)));
-	root->addChild(camera);
-
-	scene_add_ligth();
-	scene_load_plane("prueba");
-	scene_load_robot();
+	eventLoaderComplete = loader->complete()->connect([&](file::Loader::Ptr loader)
+	{
+		loaderComplete = true;
+	});
+}
+void assets_queue(std::string file) {
+	loaderComplete = false;
+	loader->queue(file);
+}
+void assets_load() {
+	loader->load();
 }
 //------------------------------------------------------------------------------------------
 // Py Html Module
 //------------------------------------------------------------------------------------------
 typedef struct {
 	PyObject_HEAD
-		PyObject *first; /* first name */
+	PyObject *first; /* first name */
 	PyObject *last;  /* last name */
 	int number;
 } Assets;
+// TODO:
+// Generar la estructura para los tipos de assets
+// -Shaders
+// -Objects
+// -Images
+// -Etc
 
 static void
 Assets_dealloc(Assets* self)
@@ -69,7 +77,7 @@ Assets_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 			Py_DECREF(self);
 			return NULL;
 		}
-
+		assets_init();
 		self->number = 0;
 	}
 
@@ -104,7 +112,6 @@ static int Assets_init(Assets *self, PyObject *args, PyObject *kwds)
 	return 0;
 }
 
-
 static PyMemberDef Assets_members[] = {
 	{ "first", T_OBJECT_EX, offsetof(Assets, first), 0,"first name" },
 	{ "last", T_OBJECT_EX, offsetof(Assets, last), 0,"last name" },
@@ -112,23 +119,25 @@ static PyMemberDef Assets_members[] = {
 	{ NULL }  /* Sentinel */
 };
 
-static PyObject * Assets_name(Assets* self)
+static PyObject * Assets_queue(Assets* self, PyObject* args)
 {
-	if (self->first == NULL) {
-		PyErr_SetString(PyExc_AttributeError, "first");
+	const char *file;
+	if (!PyArg_ParseTuple(args, "s", &file))
 		return NULL;
-	}
-
-	if (self->last == NULL) {
-		PyErr_SetString(PyExc_AttributeError, "last");
-		return NULL;
-	}
-
-	return PyUnicode_FromFormat("%S %S", self->first, self->last);
+	
+	assets_queue(std::string(file));
+	return PyUnicode_FromString(file);
+}
+static PyObject * Assets_load(Assets* self)
+{
+	assets_load();
+	return PyUnicode_FromString("loading queue... ");
 }
 
+
 static PyMethodDef Assets_methods[] = {
-	{ "name", (PyCFunction)Assets_name, METH_NOARGS,"Return the name, combining the first and last name" },
+	{ "queue", (PyCFunction)Assets_queue, METH_VARARGS,"Add a file to the load queue." },
+	{ "load", (PyCFunction)Assets_load, METH_NOARGS ,"Start the load of the assets queue." },
 	{ NULL }  /* Sentinel */
 };
 

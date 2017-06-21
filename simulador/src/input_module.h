@@ -4,34 +4,16 @@
 // Input Data
 //------------------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------------------
-// C API Input
-//------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------
 // Input eventos
 //------------------------------------------------------------------------------------------
+Signal<minko::input::Keyboard::Ptr>::Slot keydown;
+//------------------------------------------------------------------------------------------
+// C API Input
+//------------------------------------------------------------------------------------------
 void keyboard_keyDown(input::Keyboard::Ptr k) {
-	// Control Camara
-	auto transform = camera->component<Transform>();
-	if (k->keyIsDown(input::Keyboard::A)) {
-		transform->matrix(translate(math::vec3(-.1f, 0.f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::D)) {
-		transform->matrix(translate(math::vec3(.1f, 0.f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::DOWN)) {
-		transform->matrix(translate(math::vec3(0.f, -.1f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::UP)) {
-		transform->matrix(translate(math::vec3(0.f, .1f, 0.f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::W)) {
-		transform->matrix(translate(math::vec3(0.f, 0.f, -.1f)) * transform->matrix());
-	}
-	if (k->keyIsDown(input::Keyboard::S)) {
-		transform->matrix(translate(math::vec3(0.f, 0.f, .1f)) * transform->matrix());
-	}
+
 	if (k->keyIsDown(input::Keyboard::ESCAPE)) {
 		canvas->quit();
 	}
@@ -47,31 +29,38 @@ void keyboard_keyDown(input::Keyboard::Ptr k) {
 		tituloPagina->textContent(TITULO_VENTANA + " : Virtual");
 	}
 	if (k->keyIsDown(input::Keyboard::Y)) {
-		auto programName = std::string("Py_Keyboard");
-		size_t size;
-
-		Py_SetProgramName(Py_DecodeLocale(programName.c_str(), &size));
-
 		PyRun_SimpleString(
 			"from time import time,ctime\n"
 			"print('Today is', ctime(time()))\n"
 		);
-		std::cout << Py_EncodeLocale(Py_GetPath(), &size) << std::endl;
 	}
-	if (k->keyIsDown(input::Keyboard::U)) {
+	if (k->keyIsDown(input::Keyboard::Z)) {
 		PyRun_SimpleString(
-			"import enni\n"
 			"print(enni.zen())"
 		);
 	}
+	if (k->keyIsDown(input::Keyboard::H)) {
+		size_t size;
+		auto programName = std::string("__debug__");
+		Py_SetProgramName(Py_DecodeLocale(programName.c_str(), &size));
+
+		FILE* file;
+		file = fopen("./asset/config/debug.py", "r");
+		PyRun_SimpleFile(file, "./config/debug.py");
+		fclose(file);
+	}
 }
+void input_init() {
+	keydown = canvas->keyboard()->keyDown()->connect(keyboard_keyDown);
+}
+
 //------------------------------------------------------------------------------------------
 // Py Input Module
 //------------------------------------------------------------------------------------------
 
 typedef struct {
 	PyObject_HEAD
-		PyObject *first; /* first name */
+	PyObject *first; /* first name */
 	PyObject *last;  /* last name */
 	int number;
 } Input;
@@ -109,34 +98,11 @@ Input_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 	return (PyObject *)self;
 }
 
-static int Input_init(Input *self, PyObject *args, PyObject *kwds)
+static int Input_init(Input *self)
 {
-	PyObject *first = NULL, *last = NULL, *tmp;
-
-	static char *kwlist[] = { "first", "last", "number", NULL };
-
-	if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OOi", kwlist,
-		&first, &last,
-		&self->number))
-		return -1;
-
-	if (first) {
-		tmp = self->first;
-		Py_INCREF(first);
-		self->first = first;
-		Py_XDECREF(tmp);
-	}
-
-	if (last) {
-		tmp = self->last;
-		Py_INCREF(last);
-		self->last = last;
-		Py_XDECREF(tmp);
-	}
-
+	input_init();
 	return 0;
 }
-
 
 static PyMemberDef Input_members[] = {
 	{ "first", T_OBJECT_EX, offsetof(Input, first), 0,"first name" },

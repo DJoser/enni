@@ -3,13 +3,13 @@
 
 typedef struct {
 	PyObject_HEAD
-	PyObject *first; /* first name */
+		PyObject *first; /* first name */
 	PyObject *last;  /* last name */
 	int number;
-} Noddy;
+} Component;
 
 static void
-Noddy_dealloc(Noddy* self)
+Component_dealloc(Component* self)
 {
 	Py_XDECREF(self->first);
 	Py_XDECREF(self->last);
@@ -17,11 +17,11 @@ Noddy_dealloc(Noddy* self)
 }
 
 static PyObject *
-Noddy_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+Component_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-	Noddy *self;
+	Component *self;
 
-	self = (Noddy *)type->tp_alloc(type, 0);
+	self = (Component *)type->tp_alloc(type, 0);
 	if (self != NULL) {
 		self->first = PyUnicode_FromString("");
 		if (self->first == NULL) {
@@ -41,7 +41,7 @@ Noddy_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 	return (PyObject *)self;
 }
 
-static int Noddy_init(Noddy *self, PyObject *args, PyObject *kwds)
+static int Component_init(Component *self, PyObject *args, PyObject *kwds)
 {
 	PyObject *first = NULL, *last = NULL, *tmp;
 
@@ -70,14 +70,14 @@ static int Noddy_init(Noddy *self, PyObject *args, PyObject *kwds)
 }
 
 
-static PyMemberDef Noddy_members[] = {
-	{ "first", T_OBJECT_EX, offsetof(Noddy, first), 0,"first name" },
-	{ "last", T_OBJECT_EX, offsetof(Noddy, last), 0,"last name" },
-	{ "number", T_INT, offsetof(Noddy, number), 0,"noddy number" },
+static PyMemberDef Component_members[] = {
+	{ "first", T_OBJECT_EX, offsetof(Component, first), 0,"first name" },
+	{ "last", T_OBJECT_EX, offsetof(Component, last), 0,"last name" },
+	{ "number", T_INT, offsetof(Component, number), 0,"Component number" },
 	{ NULL }  /* Sentinel */
 };
 
-static PyObject * Noddy_name(Noddy* self)
+static PyObject * Component_name(Component* self)
 {
 	if (self->first == NULL) {
 		PyErr_SetString(PyExc_AttributeError, "first");
@@ -92,17 +92,17 @@ static PyObject * Noddy_name(Noddy* self)
 	return PyUnicode_FromFormat("%S %S", self->first, self->last);
 }
 
-static PyMethodDef Noddy_methods[] = {
-	{ "name", (PyCFunction)Noddy_name, METH_NOARGS,"Return the name, combining the first and last name" },
+static PyMethodDef Component_methods[] = {
+	{ "name", (PyCFunction)Component_name, METH_NOARGS,"Return the name, combining the first and last name" },
 	{ NULL }  /* Sentinel */
 };
 
-static PyTypeObject NoddyType = {
+static PyTypeObject ComponentType = {
 	PyVarObject_HEAD_INIT(NULL, 0)
-	"enni.Noddy",             /* tp_name */
-	sizeof(Noddy),             /* tp_basicsize */
+	"enni.Component",             /* tp_name */
+	sizeof(Component),             /* tp_basicsize */
 	0,                         /* tp_itemsize */
-	(destructor)Noddy_dealloc, /* tp_dealloc */
+	(destructor)Component_dealloc, /* tp_dealloc */
 	0,                         /* tp_print */
 	0,                         /* tp_getattr */
 	0,                         /* tp_setattr */
@@ -119,22 +119,22 @@ static PyTypeObject NoddyType = {
 	0,                         /* tp_as_buffer */
 	Py_TPFLAGS_DEFAULT |
 	Py_TPFLAGS_BASETYPE,   /* tp_flags */
-	"Noddy objects",           /* tp_doc */
+	"Component objects",           /* tp_doc */
 	0,                         /* tp_traverse */
 	0,                         /* tp_clear */
 	0,                         /* tp_richcompare */
 	0,                         /* tp_weaklistoffset */
 	0,                         /* tp_iter */
 	0,                         /* tp_iternext */
-	Noddy_methods,             /* tp_methods */
-	Noddy_members,             /* tp_members */
+	Component_methods,             /* tp_methods */
+	Component_members,             /* tp_members */
 	0,                         /* tp_getset */
 	0,                         /* tp_base */
 	0,                         /* tp_dict */
 	0,                         /* tp_descr_get */
 	0,                         /* tp_descr_set */
 	0,                         /* tp_dictoffset */
-	(initproc)Noddy_init,      /* tp_init */
+	(initproc)Component_init,      /* tp_init */
 	0,                         /* tp_alloc */
-	Noddy_new,                 /* tp_new */
+	Component_new,                 /* tp_new */
 };
