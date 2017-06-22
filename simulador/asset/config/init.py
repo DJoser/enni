@@ -32,7 +32,7 @@ s.nodeAddDirectionaLight(light)
 s.nodeTransformLookAt(light,0.0, 2.0, 5.0)
 
 # Buscar los modulos registrados
-######### Modulo
+######## Modulo
 robot = "robot/Tyson/model/tyson.dae" 
 a.queue(robot)
 a.load()
@@ -40,9 +40,9 @@ a.load()
 tyson = "tyson"
 s.createNode(tyson)
 s.nodeAddModel(tyson,robot)
-#########
 
-# Ciclo del programa
-while True:
-    s.nodeTransformRotate(tyson, 0.0,0.5,0.0)
-    s.nextFrame()
+import sys
+sys.path.append("C:\\Users\\ramon\\Desktop\\ENNI\\enni\\simulador\\bin\\windows32\\debug\\asset\\robot\\Tyson")
+from TysonModule import *
+robot = Tyson()
+########
