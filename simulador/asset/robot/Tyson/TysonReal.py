@@ -126,24 +126,33 @@ class TysonReal:
             self.ALTURA.connect()
     
     def calibrar(self):
+        self.BRAZO.calibrar()
+        self.BASE.calibrar()
+        self.ALTURA.calibrar()
         pass
 
     def sacarBrazo(self):
+        self.BRAZO.motor_rotate_left()
         pass
 
     def meterBrazo(self):
+        self.BRAZO.motor_rotate_right()
         pass
 
     def rotarBaseDer(self):
+        self.BASE.motor_rotate_left()
         pass
 
     def rotarBaseIzq(self):
+        self.BASE.motor_rotate_right()
         pass
 
     def levantarAltura(self):
+        self.ALTURA.motor_rotate_left()
         pass
 
     def bajarAltura(self):
+        self.ALTURA.motor_rotate_right()
         pass
 
 
