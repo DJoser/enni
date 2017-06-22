@@ -18,3 +18,4 @@ using namespace minko::component::bullet;
 CONST std::string TITULO_VENTANA = "E.N.N.I.";
 
 Canvas::Ptr canvas;
+SceneManager::Ptr sceneManager;

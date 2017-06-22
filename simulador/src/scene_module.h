@@ -1,95 +1,102 @@
 #pragma once
 #include "common.h"
+#include <chrono>
+#include <thread>
+
 //------------------------------------------------------------------------------------------
 // Scene Data
 //------------------------------------------------------------------------------------------
-SceneManager::Ptr sceneManager;
 scene::Node::Ptr root = nullptr;
-scene::Node::Ptr camera = nullptr;
-
-// Robot
-const std::string ROBOT = std::string("asset/robot/Tyson/tyson.dae");
-scene::Node::Ptr Rob = nullptr;
-scene::Node::Ptr Base = nullptr;
-scene::Node::Ptr Cabeza = nullptr;
-scene::Node::Ptr Extensor = nullptr;
-scene::Node::Ptr Piso = nullptr;
-scene::Node::Ptr Rotor = nullptr;
-
+//------------------------------------------------------------------------------------------
+// Scene Events
+//------------------------------------------------------------------------------------------
+Signal<AbstractCanvas::Ptr, float, float, bool>::Slot enterFrame;
 //------------------------------------------------------------------------------------------
 // C API Scene
 //------------------------------------------------------------------------------------------
+void scene_init(std::string name) {
+	canvas = Canvas::create(name, 960, 540);
+	sceneManager = SceneManager::create(canvas);
+	root = scene::Node::create("root")->addComponent(sceneManager);
 
-void scene_load_plane(std::string name) {
-	// Crear el plano de simulacion
-	float GROUND_WIDTH = 5.f;
-	float GROUND_DEPTH = 5.f;
-	float GROUND_THICK = 0.1f;
-	auto planoMatrix = math::scale(math::vec3(GROUND_WIDTH, GROUND_THICK, GROUND_DEPTH)) * math::mat4();
-	auto plano = scene::Node::create("plano")
-		->addComponent(Transform::create(planoMatrix))
-		->addComponent(Surface::create(
-			geometry::CubeGeometry::create(sceneManager->assets()->context()),
-			material::Material::create()
-			->set({ { "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) } }),
-			sceneManager->assets()->effect("effect/Phong.effect")
-		))
-		->addComponent(bullet::Collider::create(
-			bullet::ColliderData::create(
-				0.f, // static object (no mass)
-				bullet::BoxShape::create(GROUND_WIDTH * 0.5f, GROUND_THICK * 0.5f, GROUND_DEPTH * 0.5f)
-			)
-		))
-		->addComponent(bullet::ColliderDebug::create(sceneManager->assets()));
-	root->addChild(plano);
-}
-void scene_load_robot() {
-	auto Rob = sceneManager->assets()->symbol(ROBOT);
-
-	for (auto node : Rob->children())
+	enterFrame = sceneManager->canvas()->enterFrame()->connect([&](AbstractCanvas::Ptr canvas, float time, float deltaTime, bool flag)
 	{
-		std::string nombre = node->name();
+		std::this_thread::sleep_for(std::chrono::milliseconds(80));
+		//std::cout << "Time :\t" << time << "\tDelta :\t" << deltaTime<<std::endl;
 
-		if (nombre == "Base") { Base = node; }
-		if (nombre == "Cabeza") { Cabeza = node; }
-		if (nombre == "Extensor") { Extensor = node; }
-		if (nombre == "Piso") { Piso = node; }
-		if (nombre == "Rotor") { Rotor = node; }
-	}
-
-	// Agregar el robot a la simulacion
-	root->addChild(Rob);
+		FILE* file2;
+		file2 = fopen("./asset/config/loop.py", "r");
+		PyRun_SimpleFile(file2, "__loop__");
+		fclose(file2);
+		sceneManager->nextFrame(time, deltaTime);
+	});
 }
-void scene_add_ligth() {
-	// Agregar Luces
-	auto lights = scene::Node::create("lights")
-		->addComponent(DirectionalLight::create())
-		->addComponent(AmbientLight::create())
-		->addComponent(Transform::create(math::inverse(math::lookAt(
-			math::vec3(0.f, 2.f, 5.f),
+scene::Node::Ptr scene_create_node(std::string name) {
+	auto node = scene::Node::create(name);
+	node->addComponent(Transform::create());
+	root->addChild(node);
+	return node;
+}
+void scene_next_frame() {
+	canvas->step();
+}
+//------------------------------------------------------------------------------------------
+void node_add_model(scene::Node::Ptr node,std::string name) {
+	auto model = sceneManager->assets()->symbol(name);
+
+	if(model)
+			node->addChild(model);
+}
+void node_add_cube(scene::Node::Ptr node) {
+	node->addComponent(Surface::create(
+		geometry::CubeGeometry::create(sceneManager->assets()->context()),
+		material::Material::create()->set({
+			{ "diffuseColor", math::vec4(.5f, .5f, .5f, 1.f) }
+	}),
+		sceneManager->assets()->effect("effect/Phong.effect")
+	));
+}
+void node_add_directionalLigth(scene::Node::Ptr node) {
+	node->addComponent(DirectionalLight::create())
+		->addComponent(AmbientLight::create());
+}
+void node_add_camera(scene::Node::Ptr node) {
+	node->addComponent(Renderer::create(0x7f7f7fff))
+		->addComponent(Camera::create(
+			math::perspective(
+				.785f,
+				sceneManager->canvas()->aspectRatio(),
+				0.1f, 1000.f)
+		));
+}
+void node_transform_rotate(scene::Node::Ptr node, math::vec3 vector) {
+	node->component<Transform>()->matrix(
+		node->component<Transform>()->matrix() *
+		math::rotate(.01f, vector)
+		//math::rotate(.01f, math::vec3(0.f, 1.f, 0.f))
+	);
+}
+void node_transform_lookat(scene::Node::Ptr node, math::vec3 target) {
+	node->component<Transform>()->matrix(
+		math::inverse(math::lookAt(
+			target,
 			math::vec3(0.f, 0.f, 0.f),
 			math::vec3(0.f, 1.f, 0.f)
-		))));
-	root->addChild(lights);
+		))
+	);
 }
-void scene_remove_element();
-void scene_load_model();
-
 //------------------------------------------------------------------------------------------
 // Py Scene Module
 //------------------------------------------------------------------------------------------
 typedef struct {
 	PyObject_HEAD
-		PyObject *first; /* first name */
-	PyObject *last;  /* last name */
-	int number;
+	PyObject *root;
 } Scene;
 
 static void
 Scene_dealloc(Scene* self)
 {
-	Py_XDECREF(self->first);
-	Py_XDECREF(self->last);
+	Py_XDECREF(self->root);
 	Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
@@ -100,77 +107,134 @@ Scene_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 	self = (Scene *)type->tp_alloc(type, 0);
 	if (self != NULL) {
-		self->first = PyUnicode_FromString("");
-		if (self->first == NULL) {
+		self->root = PyUnicode_FromString("");
+		if (self->root == NULL) {
 			Py_DECREF(self);
 			return NULL;
 		}
-
-		self->last = PyUnicode_FromString("");
-		if (self->last == NULL) {
-			Py_DECREF(self);
-			return NULL;
-		}
-
-		self->number = 0;
 	}
-
+	scene_init(TITULO_VENTANA);
 	return (PyObject *)self;
 }
 
 static int Scene_init(Scene *self, PyObject *args, PyObject *kwds)
 {
-	PyObject *first = NULL, *last = NULL, *tmp;
+	PyObject *root = NULL, *tmp;
 
 	static char *kwlist[] = { "first", "last", "number", NULL };
 
-	if (!PyArg_ParseTupleAndKeywords(args, kwds, "|OOi", kwlist,
-		&first, &last,
-		&self->number))
+	if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O", kwlist,&root))
 		return -1;
 
-	if (first) {
-		tmp = self->first;
-		Py_INCREF(first);
-		self->first = first;
-		Py_XDECREF(tmp);
-	}
-
-	if (last) {
-		tmp = self->last;
-		Py_INCREF(last);
-		self->last = last;
+	if (root) {
+		tmp = self->root;
+		Py_INCREF(root);
+		self->root = root;
 		Py_XDECREF(tmp);
 	}
 
 	return 0;
 }
 
-
 static PyMemberDef Scene_members[] = {
-	{ "first", T_OBJECT_EX, offsetof(Scene, first), 0,"first name" },
-	{ "last", T_OBJECT_EX, offsetof(Scene, last), 0,"last name" },
-	{ "number", T_INT, offsetof(Scene, number), 0,"Scene number" },
+	{ "root", T_OBJECT_EX, offsetof(Scene, root), 0,"root node in the node tree" },
 	{ NULL }  /* Sentinel */
 };
 
-static PyObject * Scene_name(Scene* self)
+static PyObject * Scene_crete_node(Scene* self,PyObject *args)
 {
-	if (self->first == NULL) {
-		PyErr_SetString(PyExc_AttributeError, "first");
+	const char *name;
+	if (!PyArg_ParseTuple(args, "s", &name))
 		return NULL;
-	}
 
-	if (self->last == NULL) {
-		PyErr_SetString(PyExc_AttributeError, "last");
-		return NULL;
-	}
+	scene_create_node(std::string(name));
+	return PyUnicode_FromString(name);
 
-	return PyUnicode_FromFormat("%S %S", self->first, self->last);
 }
 
+static PyObject * Scene_next_frame(Scene* Self) {
+	scene_next_frame();
+	return PyUnicode_FromFormat("frame completed");
+}
+//------------------------------------------------------------------------------------------
+static minko::scene::Node::Ptr findNode(std::string name) {
+	auto nodeset = scene::NodeSet::create(root)->descendants(true)->where([](scene::Node::Ptr node)
+	{
+		return true;
+	});
+
+	for (auto& node : nodeset->nodes()) {
+		if (node->name().compare(name) == 0)
+			return node;
+	}
+	return nullptr;
+}
+
+// Control de modulos del nodo
+static PyObject *Node_add_cube(Scene* Self,PyObject* args) {
+	node_add_cube(findNode("cube"));
+	return Py_None;
+}
+static PyObject *Node_add_model(Scene* Self, PyObject* args) {
+	const char* name;
+	const char* model;
+
+	if (!PyArg_ParseTuple(args, "ss", &name, &model))
+		return NULL;
+
+	node_add_model(findNode(std::string(name)), std::string(model));
+	return Py_None;
+}
+static PyObject *Node_add_directionalLigth(Scene* Self, PyObject* Args) {
+	const char* name;
+
+	if (!PyArg_ParseTuple(Args, "s", &name))
+		return NULL;
+
+	node_add_directionalLigth(findNode(std::string(name)));
+	return Py_None;
+}
+static PyObject *Node_add_camera(Scene* Self, PyObject* Args) {
+	const char* name;
+
+	if (!PyArg_ParseTuple(Args, "s", &name))
+		return NULL;
+
+	node_add_camera(findNode(std::string(name)));
+	return Py_None;
+}
+static PyObject *Node_transform_rotate(Scene* Self, PyObject* Args) {
+	const char* name;
+	float x = 0.0f, y = 0.0f, z = 0.0f;
+
+	if (!PyArg_ParseTuple(Args, "sfff", &name, &x, &y, &z))
+		return NULL;
+
+	node_transform_rotate(findNode(std::string(name)), math::vec3(x, y, z));
+	return Py_None;
+}
+static PyObject *Node_transform_lookAt(Scene* Self,PyObject* Args) {
+
+	const char* name;
+	float x=0.0f, y=0.0f, z=0.0f;
+
+	if (!PyArg_ParseTuple(Args, "sfff", &name,&x,&y,&z))
+		return NULL;
+
+	node_transform_lookat(findNode(std::string(name)), math::vec3(x, y, z));
+	return Py_None;
+}
+//------------------------------------------------------------------------------------------
 static PyMethodDef Scene_methods[] = {
-	{ "name", (PyCFunction)Scene_name, METH_NOARGS,"Return the name, combining the first and last name" },
+	{ "createNode", (PyCFunction)Scene_crete_node, METH_VARARGS, "add a new node to the scene" },
+	{ "nextFrame", (PyCFunction)Scene_next_frame, METH_NOARGS, "render the next frame in the scene" },
+
+	{ "nodeAddCube", (PyCFunction)Node_add_cube, METH_NOARGS, "TODO" },
+	{ "nodeAddModel", (PyCFunction)Node_add_model, METH_VARARGS, "TODO" },
+	{ "nodeAddDirectionaLight", (PyCFunction)Node_add_directionalLigth, METH_VARARGS, "TODO" },
+	{ "nodeAddCamera", (PyCFunction)Node_add_camera, METH_VARARGS, "TODO" },
+	{ "nodeTransformRotate", (PyCFunction)Node_transform_rotate, METH_VARARGS, "TODO" },
+	{ "nodeTransformLookAt", (PyCFunction)Node_transform_lookAt, METH_VARARGS, "TODO" },
 	{ NULL }  /* Sentinel */
 };
 
