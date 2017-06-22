@@ -1,4 +1,3 @@
-#import enni
 import serial
 import sys
 import threading

@@ -40,4 +40,9 @@ a.load()
 tyson = "tyson"
 s.createNode(tyson)
 s.nodeAddModel(tyson,robot)
+
+import sys
+sys.path.append("C:\\Users\\ramon\\Desktop\\ENNI\\enni\\simulador\\bin\\windows32\\debug\\asset\\robot\\Tyson")
+from TysonModule import *
+robot = Tyson()
 ########

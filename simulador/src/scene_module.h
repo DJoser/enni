@@ -22,7 +22,7 @@ void scene_init(std::string name) {
 	enterFrame = sceneManager->canvas()->enterFrame()->connect([&](AbstractCanvas::Ptr canvas, float time, float deltaTime, bool flag)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(80));
-		std::cout << "Time :\t" << time << "\tDelta :\t" << deltaTime<<std::endl;
+		//std::cout << "Time :\t" << time << "\tDelta :\t" << deltaTime<<std::endl;
 
 		FILE* file2;
 		file2 = fopen("./asset/config/loop.py", "r");
