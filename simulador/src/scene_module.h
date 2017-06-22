@@ -1,5 +1,8 @@
 #pragma once
 #include "common.h"
+#include <chrono>
+#include <thread>
+
 //------------------------------------------------------------------------------------------
 // Scene Data
 //------------------------------------------------------------------------------------------
@@ -18,6 +21,13 @@ void scene_init(std::string name) {
 
 	enterFrame = sceneManager->canvas()->enterFrame()->connect([&](AbstractCanvas::Ptr canvas, float time, float deltaTime, bool flag)
 	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(80));
+		std::cout << "Time :\t" << time << "\tDelta :\t" << deltaTime<<std::endl;
+
+		FILE* file2;
+		file2 = fopen("./asset/config/loop.py", "r");
+		PyRun_SimpleFile(file2, "__loop__");
+		fclose(file2);
 		sceneManager->nextFrame(time, deltaTime);
 	});
 }
@@ -144,10 +154,8 @@ static PyObject * Scene_crete_node(Scene* self,PyObject *args)
 
 static PyObject * Scene_next_frame(Scene* Self) {
 	scene_next_frame();
-	return Py_None;
+	return PyUnicode_FromFormat("frame completed");
 }
-
-
 //------------------------------------------------------------------------------------------
 static minko::scene::Node::Ptr findNode(std::string name) {
 	auto nodeset = scene::NodeSet::create(root)->descendants(true)->where([](scene::Node::Ptr node)
@@ -161,7 +169,6 @@ static minko::scene::Node::Ptr findNode(std::string name) {
 	}
 	return nullptr;
 }
-
 
 // Control de modulos del nodo
 static PyObject *Node_add_cube(Scene* Self,PyObject* args) {
